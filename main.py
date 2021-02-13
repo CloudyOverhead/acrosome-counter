@@ -14,7 +14,8 @@ from acrosome_counter.build_model import build_model
 
 
 def main(args):
-    sequence = Sequence(args.data_dir, args.batch_size)
+    is_training = not args.infer
+    sequence = Sequence(args.data_dir, args.batch_size, is_training)
     log_dir = join(".", "logs")
     if not args.infer:
         model = build_model([340, 340])

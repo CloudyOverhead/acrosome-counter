@@ -1,6 +1,7 @@
 # Project specifics
 logs*
 models/
+faster_rcnn*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

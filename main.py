@@ -5,47 +5,69 @@ from argparse import ArgumentParser
 from os.path import join
 
 import numpy as np
+import matplotlib as mpl
 from matplotlib import pyplot as plt
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
+import tensorflow as tf
 from tensorflow.keras.models import load_model
+from object_detection.utils.visualization_utils import (
+    visualize_boxes_and_labels_on_image_array as visualize
+)
 
-from acrosome_counter.inputs import Sequence
-from acrosome_counter.build_model import build_model
+from acrosome_counter.inputs import Sequence, MAP_ACROSOME
+from acrosome_counter.build_model import build_model, restore, initialize_modeL
+from acrosome_counter.train import train
+
+PRETRAINED_CHECKPOINT = "faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8"
+PRETRAINED_CHECKPOINT = join(PRETRAINED_CHECKPOINT, "saved_model")
+
+mpl.use('TkAgg')
 
 
 def main(args):
     is_training = not args.infer
     sequence = Sequence(args.data_dir, args.batch_size, is_training)
     log_dir = join(".", "logs")
-    if not args.infer:
-        model = build_model([340, 340])
-        model.compile(optimizer='Adam', loss='')
-        callbacks = [
-            TensorBoard(log_dir=log_dir, profile_batch=0),
-            ModelCheckpoint(log_dir, save_freq='epoch'),
-        ]
-        model.fit(
-            sequence,
-            epochs=args.epochs,
-            callbacks=callbacks,
-            steps_per_epoch=None,
-            max_queue_size=10,
-            workers=1,
-            use_multiprocessing=False,
-        )
+    model = build_model(not args.infer)
+    if is_training:
+        restore_from = PRETRAINED_CHECKPOINT
     else:
-        model = load_model(log_dir, compile=False)
-        scans, labels = sequence[0]
-        predictions = model.predict(scans)
-        predictions = np.argmax(predictions, axis=-1)
-        labels = np.argmax(labels, axis=-1)
-        for scan, prediction, label in zip(scans, predictions, labels):
-            fig, axs = plt.subplots(ncols=2, figsize=[8, 4])
-            axs[0].set_title("Actual labels")
-            axs[0].imshow(scan, cmap='Greys')
-            axs[1].set_title("Predictions")
-            axs[1].imshow(scan, cmap='Greys')
-            plt.tight_layout()
+        restore_from = join(log_dir, "ckpt-1")
+    model, checkpoint = restore(model, restore_from)
+    initialize_modeL(model)
+    if not args.infer:
+        manager = tf.train.CheckpointManager(
+            checkpoint, log_dir, max_to_keep=1,
+        )
+        train(model, sequence, args.epochs)
+        manager.save()
+    else:
+        images, _ = sequence[0]
+        for image in images:
+            preprocessed_image, shapes = model.preprocess(image)
+            predictions = model.predict(preprocessed_image, shapes)
+            predictions = model.postprocess(predictions, shapes)
+            predictions = {
+                key: value[0].numpy() for key, value in predictions.items()
+            }
+            image = image[0]
+            boxes = predictions['detection_boxes']
+            classes = predictions['detection_classes']
+            scores = predictions['detection_scores']
+            category_index = {
+                id: {'id': id, 'name': name}
+                for name, id in MAP_ACROSOME.items()
+            }
+            annotated_image = image.numpy().copy()
+            visualize(
+                annotated_image,
+                boxes,
+                classes,
+                scores,
+                category_index,
+                use_normalized_coordinates=True,
+                min_score_thresh=0.8
+            )
+            plt.imshow(annotated_image)
             plt.show()
 
 

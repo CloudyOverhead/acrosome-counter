@@ -55,9 +55,9 @@ def main(args):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('data_dir', type=str)
-    parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--epochs', default=1, type=int)
-    parser.add_argument('-lr', '--learning_rate', default=1E-3, type=float)
+    parser.add_argument('-bs', '--batch_size', default=1, type=int)
+    parser.add_argument('-it', '--qty_iters', default=1, type=int)
+    parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
     parser.add_argument('--infer', action='store_true')
     args = parser.parse_args()
     main(args)

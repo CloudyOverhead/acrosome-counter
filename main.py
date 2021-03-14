@@ -8,7 +8,7 @@ from os.path import join
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
-from acrosome_counter.inputs import Dataset, MAP_ACROSOME
+from acrosome_counter.inputs import Dataset, MAP_IDS
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
 
@@ -38,7 +38,7 @@ def main(args):
             scores = predictions['detection_scores']
             category_index = {
                 id: {'id': id, 'name': name}
-                for name, id in MAP_ACROSOME.items()
+                for name, id in MAP_IDS.items()
             }
             annotated_image = image[0].numpy().copy()
             visualize(

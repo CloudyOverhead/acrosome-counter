@@ -9,8 +9,9 @@ from matplotlib import pyplot as plt
 from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
-MAP_ACROSOME = {'intact': 0, 'intermediaire': 1, 'perdu': 2}
-QTY_CLASSES = len(MAP_ACROSOME)
+MAP_NAMES = ['intact', 'intermediaire', 'perdu']
+MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
+QTY_CLASSES = len(MAP_NAMES)
 
 
 class Dataset:
@@ -58,7 +59,7 @@ class Dataset:
     def register(self):
         name = "train" if self.is_training else "test"
         DatasetCatalog.register(name, lambda: self)
-        MetadataCatalog.get(name).set(thing_classes=MAP_ACROSOME.keys())
+        MetadataCatalog.get(name).set(thing_classes=MAP_NAMES)
         return MetadataCatalog.get(name)
 
 
@@ -83,7 +84,7 @@ def load_labels(annotations_path):
                 ]
             )
             attribute = next(box.iter('attribute'))
-            attributes.append(MAP_ACROSOME[attribute.text])
+            attributes.append(MAP_IDS[attribute.text])
         boxes = np.array(boxes, dtype=np.float16)
         attributes = np.array(attributes, dtype=int)
         labels[name] = (boxes, attributes)

@@ -17,7 +17,7 @@ mpl.use('TkAgg')
 
 def main(args):
     is_training = not args.infer
-    sequence = Dataset(args.data_dir, is_training)
+    dataset = Dataset(args.data_dir, is_training)
     cfg = build_cfg(
         is_training, args.batch_size, args.learning_rate, args.qty_iters,
     )
@@ -27,7 +27,7 @@ def main(args):
         trainer.resume_or_load(resume=False)
         trainer.train()
     else:
-        images, _ = sequence[0]
+        images, _ = dataset[0]
         for image in images:
             predictions = model.call(image)
             predictions = {

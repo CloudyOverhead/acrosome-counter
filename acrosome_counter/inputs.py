@@ -16,6 +16,7 @@ QTY_CLASSES = len(MAP_ACROSOME)
 class Dataset:
     def __init__(self, data_dir, is_training):
         self.data_dir = data_dir
+        self.is_training = is_training
 
         self.labels = load_labels(join(data_dir, "annotations.xml"))
         self.labels = filter_labels(self.labels, is_training)

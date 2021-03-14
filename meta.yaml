@@ -1,0 +1,16 @@
+package:
+  name: acrosome_counter
+  version: 0.0.0
+
+dependencies:
+  - python>=3.6
+  - ninja
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit==10.2
+  - opencv-python
+  - matplotlib,
+  - imgaug
+  - pip:
+    - git+https://github.com/facebookresearch/detectron2.git

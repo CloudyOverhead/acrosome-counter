@@ -10,21 +10,16 @@ from shutil import copyfile
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-MODELS_PATH = join(abspath('.'), 'models', 'research')
-if not exists(MODELS_PATH):
-    run(["git", "clone", "https://github.com/tensorflow/models.git"])
-chdir(MODELS_PATH)
-run(
-    ["protoc", join("object_detection", "protos", "*.proto"), "--python_out=."]
-)
-copyfile(join("object_detection", "packages", "tf2", "setup.py"), "setup.py")
-chdir(join(pardir, pardir))
-
 REQUIREMENTS = [
-    "tensorflow-gpu",
+    "ninja",
+    "pytorch",
+    "torchvision",
+    "torchaudio",
+    "cudatoolkit==10.2",
+    "opencv-python",
+    "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
     "matplotlib",
     "imgaug",
-    f"object_detection @ file://localhost/{MODELS_PATH}",
 ]
 
 setup(

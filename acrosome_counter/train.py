@@ -60,7 +60,7 @@ def augment(record):
         ],
         shape=image.shape,
     )
-    [image], [boxes] = AUGMENTER(images=image, bounding_boxes=[boxes])
+    image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
     classes = boxes.classes
     boxes = np.array([[box.y1, box.x1, box.y2, box.x2] for box in boxes.items])
     image[..., 0] = 0

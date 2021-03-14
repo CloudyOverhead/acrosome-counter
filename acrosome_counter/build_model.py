@@ -22,8 +22,8 @@ def build_cfg(is_training, learning_rate, qty_iters):
             "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
         )
     )
-    cfg.DATASETS.TRAIN = ("balloon_train",)
-    cfg.DATASETS.TEST = ()
+    cfg.DATASETS.TRAIN = ("train",)
+    cfg.DATASETS.TEST = ("test",)
     cfg.DATALOADER.NUM_WORKERS = 2
     cfg.OUTPUT_DIR = LOG_DIR
     if is_training:

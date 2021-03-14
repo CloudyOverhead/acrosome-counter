@@ -8,6 +8,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from imgaug import augmenters as aug
 from imgaug.parameters import Normal, TruncatedNormal
+from detectron2.structures.BoxMode import XYXY_ABS
+from detectron2.data import MetadataCatalog, DatasetCatalog
 
 from acrosome_counter.bounding_box_interface import BoundingBoxes
 
@@ -15,60 +17,50 @@ MAP_ACROSOME = {'intact': 0, 'intermediaire': 1, 'perdu': 2}
 QTY_CLASSES = len(MAP_ACROSOME)
 
 
-class Sequence:
-    def __init__(self, data_dir, batch_size, is_training):
+class Dataset:
+    def __init__(self, data_dir, is_training):
         self.data_dir = data_dir
-        self.batch_size = batch_size
-        self.is_training = is_training
 
         self.labels = load_labels(join(data_dir, "annotations.xml"))
         self.labels = filter_labels(self.labels, is_training)
-
-        self.on_epoch_end()
+        self.filenames = [filename for filename in self.labels.keys()]
 
     def __len__(self):
-        return len(self.labels) // self.batch_size
+        return len(self.filenames)
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
 
     def __getitem__(self, idx):
-        try:
-            current_filenames = next(self.batch_filenames)
-        except StopIteration:
-            self.on_epoch_end()
-            current_filenames = next(self.batch_filenames)
-        images = []
-        boxes = []
-        classes = []
-        for i, filename in enumerate(current_filenames):
-            image = load_image(join(self.data_dir, "images", filename))
-            images.append(image)
-            if self.is_training:
-                current_boxes, current_classes = self.labels[filename]
-                boxes.append(current_boxes)
-                classes.append(current_classes)
+        filename = self.filenames[idx]
+        image = plt.imread(join(self.data_dir, "images", filename))
+        height, width, _ = image.shape
 
+        annotations = []
         if self.is_training:
-            images, boxes, classes = augment(images, boxes, classes)
+            boxes, classes = self.labels[filename]
+            for box, class_ in zip(boxes, classes):
+                annotation = {
+                    "bbox": box,
+                    "bbox_mode": XYXY_ABS,
+                    "category_id": class_,
+                }
+                annotations.append(annotation)
 
-        for i, (image, current_boxes) in enumerate(zip(images, boxes)):
-            height, width, _ = image.shape
-            boxes[i][:, [0, 2]] /= height
-            boxes[i][:, [1, 3]] /= width
+        return {
+            "file_name": filename,
+            "image_id": idx,
+            "height": height,
+            "width": width,
+            "annotations": annotations,
+        }
 
-        images = np.array(images, dtype=np.float32)
-        images[..., 0] = 0
-        classes = [
-            one_hot_encode(current_classes, QTY_CLASSES)
-            for current_classes in classes
-        ]
-        return images, (boxes, classes)
-
-    def on_epoch_end(self):
-        self.batch_filenames = np.random.choice(
-            [key for key in self.labels.keys()],
-            size=[len(self), self.batch_size],
-            replace=False,
-        )
-        self.batch_filenames = iter(self.batch_filenames)
+    def register(self):
+        name = "train" if self.is_training else "test"
+        DatasetCatalog.register(name, lambda: self)
+        MetadataCatalog.get(name).set(thing_classes=MAP_ACROSOME.keys())
+        return MetadataCatalog.get(name)
 
 
 def load_labels(annotations_path):
@@ -113,11 +105,6 @@ def filter_labels(labels, is_training):
     return {name: labels[name] for name in keep_names}
 
 
-def load_image(filename):
-    image = plt.imread(filename)
-    return image
-
-
 def augment(images, boxes, classes):
     sequential = aug.Sequential(
         [
@@ -151,10 +138,3 @@ def augment(images, boxes, classes):
         images, boxes[:] = sequential(images=images, bounding_boxes=boxes)
         boxes.clip()
     return images, boxes, boxes.classes
-
-
-def one_hot_encode(classes, qty_classes):
-    encoded = np.zeros([len(classes), qty_classes])
-    for i, class_ in enumerate(classes):
-        encoded[i, class_] = 1
-    return encoded

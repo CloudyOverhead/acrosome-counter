@@ -38,7 +38,6 @@ def main(args):
             image_path = image_info["file_name"]
             image = plt.imread(image_path).copy()
             image[..., 0] = 0
-            image = image.transpose(2, 0, 1).astype(np.float32)
             outputs = predictor(image)
             visualizer = Visualizer(
                 image,
@@ -46,7 +45,7 @@ def main(args):
                 scale=.5,
             )
             out = visualizer.draw_instance_predictions(
-                outputs["instances"].to("gpu")
+                outputs["instances"].to("cpu")
             )
             annotated_image = out.get_image()
             plt.imshow(annotated_image)

@@ -2,6 +2,7 @@
 logs*
 models/
 faster_rcnn*
+ssd*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

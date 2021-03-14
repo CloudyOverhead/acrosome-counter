@@ -8,11 +8,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.utils import Sequence
+from imgaug import augmenters as aug
+from imgaug.parameters import Normal, TruncatedNormal
+
+from acrosome_counter.bounding_box_interface import BoundingBoxes
 
 MAP_ACROSOME = {'intact': 0, 'intermediaire': 1, 'perdu': 2}
-IMAGE_SHAPE = [1024, 1024, 3]
-MAX_PER_IMAGE = 100
-QTY_CLASSES = 3
+QTY_CLASSES = len(MAP_ACROSOME)
 
 
 class Sequence(Sequence):
@@ -30,7 +32,11 @@ class Sequence(Sequence):
         return len(self.labels) // self.batch_size
 
     def __getitem__(self, idx):
-        current_filenames = self.batch_filenames[idx]
+        try:
+            current_filenames = next(self.batch_filenames)
+        except StopIteration:
+            self.on_epoch_end()
+            current_filenames = next(self.batch_filenames)
         images = []
         boxes = []
         classes = []
@@ -38,30 +44,36 @@ class Sequence(Sequence):
             image = load_image(join(self.data_dir, "images", filename))
             images.append(image)
             if self.is_training:
-                height, width, _ = image.shape
-                current_boxes, attributes = self.labels[filename]
-                current_boxes[:, [0, 2]] /= height
-                current_boxes[:, [1, 3]] /= width
-                current_classes = np.zeros([len(attributes), QTY_CLASSES])
-                for j, class_ in enumerate(attributes):
-                    current_classes[j, class_] = 1
-                current_boxes = tf.convert_to_tensor(
-                    current_boxes, dtype=tf.float32,
-                )
-                boxes.append(np.array(current_boxes))
-                current_classes = tf.convert_to_tensor(
-                    current_classes, dtype=tf.float32,
-                )
+                current_boxes, current_classes = self.labels[filename]
+                boxes.append(current_boxes)
                 classes.append(current_classes)
-        images = np.array(images)
+
+        if self.is_training:
+            images, boxes, classes = augment(images, boxes, classes)
+
+        for i, (image, current_boxes) in enumerate(zip(images, boxes)):
+            height, width, _ = image.shape
+            boxes[i][:, [0, 2]] /= height
+            boxes[i][:, [1, 3]] /= width
+
+        images = np.array(images, dtype=np.float32)
         images[..., 0] = 0
-        images /= 255
         images = [
-            tf.expand_dims(
-                tf.convert_to_tensor(image, dtype=tf.float32),
-                axis=0
-            )
+            tf.convert_to_tensor(image, dtype=tf.float32)
             for image in images
+        ]
+        images = [tf.expand_dims(image, axis=0) for image in images]
+        classes = [
+            one_hot_encode(current_classes, QTY_CLASSES)
+            for current_classes in classes
+        ]
+        classes = [
+            tf.convert_to_tensor(current_classes, dtype=tf.float32)
+            for current_classes in classes
+        ]
+        boxes = [
+            tf.convert_to_tensor(current_boxes, dtype=tf.float32)
+            for current_boxes in boxes
         ]
         return images, (boxes, classes)
 
@@ -71,6 +83,7 @@ class Sequence(Sequence):
             size=[len(self), self.batch_size],
             replace=False,
         )
+        self.batch_filenames = iter(self.batch_filenames)
 
 
 def load_labels(annotations_path):
@@ -118,3 +131,45 @@ def filter_labels(labels, is_training):
 def load_image(filename):
     image = plt.imread(filename)
     return image
+
+
+def augment(images, boxes, classes):
+    sequential = aug.Sequential(
+        [
+            aug.Add(Normal(0, 10), per_channel=True),
+            aug.Multiply(TruncatedNormal(1, .1, low=.5, high=1.5)),
+            aug.GaussianBlur((0, 2)),
+            aug.Fliplr(.5),
+            aug.Flipud(.5),
+            aug.Affine(
+                scale={
+                    'x': TruncatedNormal(1, .1, low=.8, high=1.2),
+                    'y': TruncatedNormal(1, .1, low=.8, high=1.2),
+                },
+                translate_percent={
+                    'x': TruncatedNormal(0, .1, low=-.2, high=.2),
+                    'y': TruncatedNormal(0, .1, low=-.2, high=.2),
+                },
+                rotate=(-180, 180),
+                shear={
+                    'x': TruncatedNormal(0, 10, low=-30, high=30),
+                    'y': TruncatedNormal(0, 10, low=-30, high=30),
+                },
+                cval=(0, 255),
+            ),
+            aug.CoarseSaltAndPepper((.01, .1), size_percent=(5E-3, 5E-2)),
+        ]
+    )
+
+    boxes = BoundingBoxes(images, boxes, classes)
+    with boxes:
+        images, boxes[:] = sequential(images=images, bounding_boxes=boxes)
+        boxes.clip()
+    return images, boxes, boxes.classes
+
+
+def one_hot_encode(classes, qty_classes):
+    encoded = np.zeros([len(classes), qty_classes])
+    for i, class_ in enumerate(classes):
+        encoded[i, class_] = 1
+    return encoded

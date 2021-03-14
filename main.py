@@ -4,21 +4,20 @@
 from argparse import ArgumentParser
 from os.path import join
 
-import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import tensorflow as tf
-from tensorflow.keras.models import load_model
+from tensorflow.compat.v2.train import Checkpoint
 from object_detection.utils.visualization_utils import (
     visualize_boxes_and_labels_on_image_array as visualize
 )
 
 from acrosome_counter.inputs import Sequence, MAP_ACROSOME
-from acrosome_counter.build_model import build_model, restore, initialize_modeL
+from acrosome_counter.build_model import build_model, restore
 from acrosome_counter.train import train
 
 PRETRAINED_CHECKPOINT = "faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8"
-PRETRAINED_CHECKPOINT = join(PRETRAINED_CHECKPOINT, "saved_model")
+PRETRAINED_CHECKPOINT = join(PRETRAINED_CHECKPOINT, 'checkpoint', 'ckpt-0')
 
 mpl.use('TkAgg')
 
@@ -32,32 +31,29 @@ def main(args):
         restore_from = PRETRAINED_CHECKPOINT
     else:
         restore_from = join(log_dir, "ckpt-1")
-    model, checkpoint = restore(model, restore_from)
-    initialize_modeL(model)
+    restore(model, restore_from, is_training)
     if not args.infer:
+        checkpoint = Checkpoint(model=model)
         manager = tf.train.CheckpointManager(
             checkpoint, log_dir, max_to_keep=1,
         )
-        train(model, sequence, args.epochs)
+        train(model, sequence, args.epochs, args.learning_rate)
         manager.save()
     else:
         images, _ = sequence[0]
         for image in images:
-            preprocessed_image, shapes = model.preprocess(image)
-            predictions = model.predict(preprocessed_image, shapes)
-            predictions = model.postprocess(predictions, shapes)
+            predictions = model.call(image)
             predictions = {
                 key: value[0].numpy() for key, value in predictions.items()
             }
-            image = image[0]
             boxes = predictions['detection_boxes']
-            classes = predictions['detection_classes']
+            classes = predictions['detection_classes'].astype(int).tolist()
             scores = predictions['detection_scores']
             category_index = {
                 id: {'id': id, 'name': name}
                 for name, id in MAP_ACROSOME.items()
             }
-            annotated_image = image.numpy().copy()
+            annotated_image = image[0].numpy().copy()
             visualize(
                 annotated_image,
                 boxes,
@@ -65,8 +61,10 @@ def main(args):
                 scores,
                 category_index,
                 use_normalized_coordinates=True,
-                min_score_thresh=0.8
+                min_score_thresh=0.8,
+                max_boxes_to_draw=None,
             )
+            annotated_image /= 255
             plt.imshow(annotated_image)
             plt.show()
 
@@ -76,6 +74,7 @@ if __name__ == '__main__':
     parser.add_argument('data_dir', type=str)
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--epochs', default=1, type=int)
+    parser.add_argument('-lr', '--learning_rate', default=1E-3, type=float)
     parser.add_argument('--infer', action='store_true')
     args = parser.parse_args()
     main(args)

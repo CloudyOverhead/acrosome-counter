@@ -23,6 +23,7 @@ chdir(join(pardir, pardir))
 REQUIREMENTS = [
     "tensorflow-gpu",
     "matplotlib",
+    "imgaug",
     f"object_detection @ file://localhost/{MODELS_PATH}",
 ]
 

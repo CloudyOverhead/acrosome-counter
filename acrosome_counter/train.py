@@ -14,7 +14,7 @@ def get_model_train_step_function(
 ):
     """Get a tf.function for training step."""
     @tf.function
-    def train_step_fn(images, boxes, classes):
+    def train_step_fn(images, shapes):
         """A single training iteration.
 
         :param images: A list of [1, height, width, 3] Tensor of type
@@ -28,17 +28,8 @@ def get_model_train_step_function(
 
         :return: The total loss for the input batch.
         """
-        shapes = tf.constant(batch_size * [[1024, 1024, 3]], dtype=tf.int32)
-        model.provide_groundtruth(
-            groundtruth_boxes_list=boxes,
-            groundtruth_classes_list=classes,
-        )
         with tf.GradientTape() as tape:
-            preprocessed_images = tf.concat(
-                [model.preprocess(image)[0] for image in images],
-                axis=0,
-            )
-            prediction_dict = model.predict(preprocessed_images, shapes)
+            prediction_dict = model.predict(images, shapes)
             losses_dict = model.loss(prediction_dict, shapes)
             total_loss = sum(losses_dict.values())
             gradients = tape.gradient(total_loss, vars_to_fine_tune)
@@ -48,24 +39,31 @@ def get_model_train_step_function(
     return train_step_fn
 
 
-def train(model, sequence, qty_epochs):
+def train(model, sequence, qty_epochs, learning_rate):
     tf.keras.backend.set_learning_phase(True)
 
     trainable_variables = model.trainable_variables
-    prefix = "FirstStageBoxPredictor/ConvolutionalBoxHead"
+    prefixes_to_train = ['RPNConv', 'FirstStageBoxPredictor', 'mask_rcnn']
     to_fine_tune = []
     for var in trainable_variables:
-        if var.name.startswith(prefix):
+        if any([var.name.startswith(prefix) for prefix in prefixes_to_train]):
             to_fine_tune.append(var)
 
-    optimizer = tf.keras.optimizers.Adam(learning_rate=.00004)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     train_step_fn = get_model_train_step_function(
         model, optimizer, to_fine_tune, sequence.batch_size,
     )
 
     for epoch in range(qty_epochs):
         images, (boxes, classes) = sequence[epoch]
-        total_loss = train_step_fn(images, boxes, classes)
+        model.provide_groundtruth(
+            groundtruth_boxes_list=boxes,
+            groundtruth_classes_list=classes,
+        )
+        inputs = [model.preprocess(image) for image in images]
+        images = tf.concat([input[0] for input in inputs], axis=0)
+        shapes = tf.concat([input[1] for input in inputs], axis=0)
+        total_loss = train_step_fn(images, shapes)
         print(
             f"Epoch {epoch+1} of {qty_epochs}, loss={total_loss.numpy()}",
             flush=True,

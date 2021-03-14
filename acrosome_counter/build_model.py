@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 """Build the network."""
 
+from os.path import join
+
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
 
 from acrosome_counter.inputs import QTY_CLASSES
 
 IMAGE_SHAPE = [1024, 1024, 3]
-CONFIG_PATH = (
-    'models\\research\\object_detection\\configs\\tf2'
-    '\\faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8.config'
+LOG_DIR = join(".", "logs")
+PRETRAINED_CHECKPOINT = model_zoo.get_checkpoint_url(
+    "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
 )
 
 
-def build_cfg(log_dir, restore_from, learning_rate, qty_iters):
+def build_cfg(is_training, learning_rate, qty_iters):
     cfg = get_cfg()
     cfg.merge_from_file(
         model_zoo.get_config_file(
@@ -23,8 +25,11 @@ def build_cfg(log_dir, restore_from, learning_rate, qty_iters):
     cfg.DATASETS.TRAIN = ("balloon_train",)
     cfg.DATASETS.TEST = ()
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.OUTPUT_DIR = log_dir
-    cfg.MODEL.WEIGHTS = restore_from
+    cfg.OUTPUT_DIR = LOG_DIR
+    if is_training:
+        cfg.MODEL.WEIGHTS = PRETRAINED_CHECKPOINT
+    else:
+        cfg.MODEL.WEIGHTS = join(LOG_DIR, "model_final.pth")
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = learning_rate
     cfg.SOLVER.MAX_ITER = qty_iters

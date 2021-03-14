@@ -5,9 +5,9 @@ from copy import deepcopy
 import torch
 import numpy as np
 from matplotlib import pyplot as plt
-from detectron2 import utils
 from detectron2.engine import DefaultTrainer
 from detectron2.data import build_detection_train_loader
+from detectron2.data import detection_utils as utils
 from detectron2.structures import BoxMode
 from imgaug import augmenters as aug
 from imgaug.parameters import Normal, TruncatedNormal
@@ -61,7 +61,7 @@ def augment(record):
         shape=image.shape,
     )
     image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
-    classes = boxes.classes
+    classes = [bbox.label for bbox in boxes.bounding_boxes]
     boxes = np.array([[box.y1, box.x1, box.y2, box.x2] for box in boxes.items])
     image[..., 0] = 0
     image = image.transpose(2, 0, 1).astype(np.float32)
@@ -71,6 +71,6 @@ def augment(record):
         for box, class_ in zip(boxes, classes)
     ]
     record["image"] = torch.as_tensor(image)
-    instances = utils.annotations_to_instances(annos, image.shape[:2])
+    instances = utils.annotations_to_instances(annotations, image.shape[:2])
     record["instances"] = utils.filter_empty_instances(instances)
     return record

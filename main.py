@@ -2,6 +2,7 @@
 """Launch training and inference."""
 
 from argparse import ArgumentParser
+from os import makedirs
 from os.path import join
 
 import matplotlib as mpl
@@ -9,6 +10,7 @@ from matplotlib import pyplot as plt
 
 from acrosome_counter.inputs import Sequence, MAP_ACROSOME
 from acrosome_counter.build_model import build_cfg
+from acrosome_counter.train import Trainer
 
 mpl.use('TkAgg')
 
@@ -18,8 +20,8 @@ def main(args):
     sequence = Sequence(args.data_dir, args.batch_size, is_training)
     cfg = build_cfg(is_training, args.learning_rate, args.qty_iters)
     if is_training:
-        os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-        trainer = DefaultTrainer(cfg)
+        makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+        trainer = Trainer(cfg)
         trainer.resume_or_load(resume=False)
         trainer.train()
     else:

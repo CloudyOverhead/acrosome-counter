@@ -6,8 +6,6 @@ from xml.etree.ElementTree import parse as xml_parse
 
 import numpy as np
 from matplotlib import pyplot as plt
-from imgaug import augmenters as aug
-from imgaug.parameters import Normal, TruncatedNormal
 from detectron2.structures.BoxMode import XYXY_ABS
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
@@ -103,38 +101,3 @@ def filter_labels(labels, is_training):
         if do_keep:
             keep_names.append(name)
     return {name: labels[name] for name in keep_names}
-
-
-def augment(images, boxes, classes):
-    sequential = aug.Sequential(
-        [
-            aug.Add(Normal(0, 10), per_channel=True),
-            aug.Multiply(TruncatedNormal(1, .1, low=.5, high=1.5)),
-            aug.GaussianBlur((0, 2)),
-            aug.Fliplr(.5),
-            aug.Flipud(.5),
-            aug.Affine(
-                scale={
-                    'x': TruncatedNormal(1, .1, low=.8, high=1.2),
-                    'y': TruncatedNormal(1, .1, low=.8, high=1.2),
-                },
-                translate_percent={
-                    'x': TruncatedNormal(0, .1, low=-.2, high=.2),
-                    'y': TruncatedNormal(0, .1, low=-.2, high=.2),
-                },
-                rotate=(-180, 180),
-                shear={
-                    'x': TruncatedNormal(0, 10, low=-30, high=30),
-                    'y': TruncatedNormal(0, 10, low=-30, high=30),
-                },
-                cval=(0, 255),
-            ),
-            aug.CoarseSaltAndPepper((.01, .1), size_percent=(5E-3, 5E-2)),
-        ]
-    )
-
-    boxes = BoundingBoxes(images, boxes, classes)
-    with boxes:
-        images, boxes[:] = sequential(images=images, bounding_boxes=boxes)
-        boxes.clip()
-    return images, boxes, boxes.classes

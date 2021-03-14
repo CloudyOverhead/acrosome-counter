@@ -9,8 +9,6 @@ from matplotlib import pyplot as plt
 from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
-from acrosome_counter.bounding_box_interface import BoundingBoxes
-
 MAP_ACROSOME = {'intact': 0, 'intermediaire': 1, 'perdu': 2}
 QTY_CLASSES = len(MAP_ACROSOME)
 

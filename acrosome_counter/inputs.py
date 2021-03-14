@@ -34,7 +34,8 @@ class Dataset:
 
     def __getitem__(self, idx):
         filename = self.filenames[idx]
-        image = plt.imread(join(self.data_dir, "images", filename))
+        filepath = join(self.data_dir, "images", filename)
+        image = plt.imread(filepath)
         height, width, _ = image.shape
 
         annotations = []
@@ -49,7 +50,7 @@ class Dataset:
                 annotations.append(annotation)
 
         return {
-            "file_name": filename,
+            "file_name": filepath,
             "image_id": idx,
             "height": height,
             "width": width,

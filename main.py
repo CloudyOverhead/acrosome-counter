@@ -8,7 +8,7 @@ from os.path import join
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
-from acrosome_counter.inputs import Sequence, MAP_ACROSOME
+from acrosome_counter.inputs import Dataset, MAP_ACROSOME
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
 
@@ -17,8 +17,10 @@ mpl.use('TkAgg')
 
 def main(args):
     is_training = not args.infer
-    sequence = Sequence(args.data_dir, args.batch_size, is_training)
-    cfg = build_cfg(is_training, args.learning_rate, args.qty_iters)
+    sequence = Dataset(args.data_dir, is_training)
+    cfg = build_cfg(
+        is_training, args.batch_size, args.learning_rate, args.qty_iters,
+    )
     if is_training:
         makedirs(cfg.OUTPUT_DIR, exist_ok=True)
         trainer = Trainer(cfg)

@@ -15,7 +15,7 @@ PRETRAINED_CHECKPOINT = model_zoo.get_checkpoint_url(
 )
 
 
-def build_cfg(is_training, learning_rate, qty_iters):
+def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     cfg = get_cfg()
     cfg.merge_from_file(
         model_zoo.get_config_file(
@@ -30,7 +30,7 @@ def build_cfg(is_training, learning_rate, qty_iters):
         cfg.MODEL.WEIGHTS = PRETRAINED_CHECKPOINT
     else:
         cfg.MODEL.WEIGHTS = join(LOG_DIR, "model_final.pth")
-    cfg.SOLVER.IMS_PER_BATCH = 2
+    cfg.SOLVER.IMS_PER_BATCH = batch_size
     cfg.SOLVER.BASE_LR = learning_rate
     cfg.SOLVER.MAX_ITER = qty_iters
     cfg.SOLVER.STEPS = []

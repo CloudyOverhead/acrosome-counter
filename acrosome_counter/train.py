@@ -51,8 +51,8 @@ def augment(record):
     image = plt.imread(record["file_name"])
     annotations = record["annotations"]
 
-    boxes = [annotation.bbox for annotation in annotations]
-    classes = [annotation.category_id for annotation in annotations]
+    boxes = [annotation["bbox"] for annotation in annotations]
+    classes = [annotation["category_id"] for annotation in annotations]
     boxes = BoundingBoxesOnImage(
         [
             BoundingBox(x1, y1, x2, y2, label=class_)

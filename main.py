@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 from os import makedirs
 from os.path import join
 
+import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from detectron2.engine import DefaultPredictor

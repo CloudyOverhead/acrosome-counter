@@ -6,7 +6,7 @@ from xml.etree.ElementTree import parse as xml_parse
 
 import numpy as np
 from matplotlib import pyplot as plt
-from detectron2.structures.BoxMode import XYXY_ABS
+from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
 from acrosome_counter.bounding_box_interface import BoundingBoxes
@@ -41,7 +41,7 @@ class Dataset:
             for box, class_ in zip(boxes, classes):
                 annotation = {
                     "bbox": box,
-                    "bbox_mode": XYXY_ABS,
+                    "bbox_mode": BoxMode.XYXY_ABS,
                     "category_id": class_,
                 }
                 annotations.append(annotation)

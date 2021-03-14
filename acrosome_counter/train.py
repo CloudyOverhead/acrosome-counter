@@ -7,7 +7,7 @@ import numpy as np
 from detectron2 import utils
 from detectron2.engine import DefaultTrainer
 from detectron2.data import build_detection_train_loader
-from detectron2.structures.BoxMode import XYXY_ABS
+from detectron2.structures import BoxMode
 from imgaug import augmenters as aug
 from imgaug.parameters import Normal, TruncatedNormal
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
@@ -66,7 +66,7 @@ def augment(record):
     image = image.transpose(2, 0, 1).astype(np.float32)
 
     annotations = [
-        {"bbox": box, "bbox_mode": XYXY_ABS, "category_id": class_}
+        {"bbox": box, "bbox_mode": BoxMode.XYXY_ABS, "category_id": class_}
         for box, class_ in zip(boxes, classes)
     ]
     record["image"] = torch.as_tensor(image)

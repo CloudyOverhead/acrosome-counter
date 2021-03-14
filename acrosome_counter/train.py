@@ -4,6 +4,7 @@ from copy import deepcopy
 
 import torch
 import numpy as np
+from matplotlib import pyplot as plt
 from detectron2 import utils
 from detectron2.engine import DefaultTrainer
 from detectron2.data import build_detection_train_loader

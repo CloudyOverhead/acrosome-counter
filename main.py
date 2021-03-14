@@ -24,13 +24,12 @@ mpl.use('TkAgg')
 def main(args):
     is_training = not args.infer
     sequence = Sequence(args.data_dir, args.batch_size, is_training)
-    log_dir = join(".", "logs")
-    model = build_model(not args.infer)
     if is_training:
         restore_from = PRETRAINED_CHECKPOINT
     else:
-        restore_from = join(log_dir, "ckpt-1")
-    restore(model, restore_from, is_training)
+        restore_from = join(log_dir, "model_final.pth")
+    cfg = build_cfg(LOG_DIR, restore_from, args.learning_rate, args.qty_iters)
+    print(cfg)
     if is_training:
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
         trainer = DefaultTrainer(cfg)

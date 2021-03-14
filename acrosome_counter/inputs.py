@@ -6,8 +6,6 @@ from xml.etree.ElementTree import parse as xml_parse
 
 import numpy as np
 from matplotlib import pyplot as plt
-import tensorflow as tf
-from tensorflow.keras.utils import Sequence
 from imgaug import augmenters as aug
 from imgaug.parameters import Normal, TruncatedNormal
 
@@ -17,7 +15,7 @@ MAP_ACROSOME = {'intact': 0, 'intermediaire': 1, 'perdu': 2}
 QTY_CLASSES = len(MAP_ACROSOME)
 
 
-class Sequence(Sequence):
+class Sequence:
     def __init__(self, data_dir, batch_size, is_training):
         self.data_dir = data_dir
         self.batch_size = batch_size
@@ -58,22 +56,9 @@ class Sequence(Sequence):
 
         images = np.array(images, dtype=np.float32)
         images[..., 0] = 0
-        images = [
-            tf.convert_to_tensor(image, dtype=tf.float32)
-            for image in images
-        ]
-        images = [tf.expand_dims(image, axis=0) for image in images]
         classes = [
             one_hot_encode(current_classes, QTY_CLASSES)
             for current_classes in classes
-        ]
-        classes = [
-            tf.convert_to_tensor(current_classes, dtype=tf.float32)
-            for current_classes in classes
-        ]
-        boxes = [
-            tf.convert_to_tensor(current_boxes, dtype=tf.float32)
-            for current_boxes in boxes
         ]
         return images, (boxes, classes)
 

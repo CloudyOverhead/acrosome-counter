@@ -35,7 +35,7 @@ def main(args):
         metadata = MetadataCatalog.get("test")
         for image_info in dataset:
             image_path = image_info["file_name"]
-            image = plt.imread(image_path)
+            image = plt.imread(image_path).copy()
             image[..., 0] = 0
             image = image.transpose(2, 0, 1).astype(np.float32)
             outputs = predictor(image)

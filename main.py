@@ -14,7 +14,6 @@ from object_detection.utils.visualization_utils import (
 
 from acrosome_counter.inputs import Sequence, MAP_ACROSOME
 from acrosome_counter.build_model import build_model, restore
-from acrosome_counter.train import train
 
 PRETRAINED_CHECKPOINT = "faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8"
 PRETRAINED_CHECKPOINT = join(PRETRAINED_CHECKPOINT, 'checkpoint', 'ckpt-0')
@@ -32,13 +31,11 @@ def main(args):
     else:
         restore_from = join(log_dir, "ckpt-1")
     restore(model, restore_from, is_training)
-    if not args.infer:
-        checkpoint = Checkpoint(model=model)
-        manager = tf.train.CheckpointManager(
-            checkpoint, log_dir, max_to_keep=1,
-        )
-        train(model, sequence, args.epochs, args.learning_rate)
-        manager.save()
+    if is_training:
+        os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+        trainer = DefaultTrainer(cfg)
+        trainer.resume_or_load(resume=False)
+        trainer.train()
     else:
         images, _ = sequence[0]
         for image in images:

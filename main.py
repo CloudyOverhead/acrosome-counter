@@ -17,7 +17,6 @@ def main(args):
     is_training = not args.infer
     sequence = Sequence(args.data_dir, args.batch_size, is_training)
     cfg = build_cfg(is_training, args.learning_rate, args.qty_iters)
-    print(cfg)
     if is_training:
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
         trainer = DefaultTrainer(cfg)

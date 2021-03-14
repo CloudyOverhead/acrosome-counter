@@ -7,6 +7,9 @@ from os.path import join
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+from detectron2.engine import DefaultPredictor
+from detectron2.utils.visualizer import Visualizer
+from detectron2.data import MetadataCatalog
 
 from acrosome_counter.inputs import Dataset, MAP_IDS
 from acrosome_counter.build_model import build_cfg
@@ -27,31 +30,24 @@ def main(args):
         trainer.resume_or_load(resume=False)
         trainer.train()
     else:
-        images, _ = dataset[0]
-        for image in images:
-            predictions = model.call(image)
-            predictions = {
-                key: value[0].numpy() for key, value in predictions.items()
-            }
-            boxes = predictions['detection_boxes']
-            classes = predictions['detection_classes'].astype(int).tolist()
-            scores = predictions['detection_scores']
-            category_index = {
-                id: {'id': id, 'name': name}
-                for name, id in MAP_IDS.items()
-            }
-            annotated_image = image[0].numpy().copy()
-            visualize(
-                annotated_image,
-                boxes,
-                classes,
-                scores,
-                category_index,
-                use_normalized_coordinates=True,
-                min_score_thresh=0.8,
-                max_boxes_to_draw=None,
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .7
+        predictor = DefaultPredictor(cfg)
+        metadata = MetadataCatalog.get("test")
+        for image_info in dataset:
+            image_path = image_info["file_name"]
+            image = plt.imread(image_path)
+            image[..., 0] = 0
+            image = image.transpose(2, 0, 1).astype(np.float32)
+            outputs = predictor(image)
+            visualizer = Visualizer(
+                image,
+                metadata=metadata,
+                scale=.5,
             )
-            annotated_image /= 255
+            out = visualizer.draw_instance_predictions(
+                outputs["instances"].to("gpu")
+            )
+            annotated_image = out.get_image()
             plt.imshow(annotated_image)
             plt.show()
 

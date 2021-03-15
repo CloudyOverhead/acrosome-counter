@@ -55,14 +55,14 @@ def augment(record):
     classes = [annotation["category_id"] for annotation in annotations]
     boxes = BoundingBoxesOnImage(
         [
-            BoundingBox(x1, y1, x2, y2, label=class_)
-            for (y1, x1, y2, x2), class_ in zip(boxes, classes)
+            BoundingBox(*box, label=class_)
+            for box, class_ in zip(boxes, classes)
         ],
         shape=image.shape,
     )
     image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
     classes = [bbox.label for bbox in boxes.bounding_boxes]
-    boxes = np.array([[box.y1, box.x1, box.y2, box.x2] for box in boxes.items])
+    boxes = np.array([[box.x1, box.y1, box.x2, box.y2] for box in boxes.items])
     image[..., 0] = 0
     image = image.transpose(2, 0, 1).astype(np.float32)
 

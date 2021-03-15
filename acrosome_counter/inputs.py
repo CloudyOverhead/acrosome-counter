@@ -78,10 +78,10 @@ def load_labels(annotations_path):
         for box in image:
             boxes.append(
                 [
-                    box.get('ytl'),
                     box.get('xtl'),
-                    box.get('ybr'),
+                    box.get('ytl'),
                     box.get('xbr'),
+                    box.get('ybr'),
                 ]
             )
             attribute = next(box.iter('attribute'))

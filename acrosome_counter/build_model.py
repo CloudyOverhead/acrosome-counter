@@ -25,6 +25,7 @@ def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     cfg.DATASETS.TRAIN = ("train",)
     cfg.DATASETS.TEST = ()
     cfg.DATALOADER.NUM_WORKERS = 2
+    cfg.INPUT.FORMAT = "RGB"
     cfg.OUTPUT_DIR = LOG_DIR
     if is_training:
         cfg.MODEL.WEIGHTS = PRETRAINED_CHECKPOINT

@@ -37,12 +37,10 @@ def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     cfg.SOLVER.STEPS = []
 
     cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[1.0]]
-    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[16]]
     cfg.MODEL.PIXEL_MEAN = [116.28, 103.53]
     cfg.MODEL.PIXEL_STD = [1.0, 1.0]
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = QTY_CLASSES
-    cfg.MODEL.RPN.IN_FEATURES = ['p5', 'p6']
 
     cfg.TEST.DETECTIONS_PER_IMAGE = 256
 

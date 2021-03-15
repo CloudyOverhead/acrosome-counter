@@ -37,8 +37,9 @@ def main(args):
         for image_info in dataset:
             image_path = image_info["file_name"]
             image = plt.imread(image_path).copy()
-            image[..., 0] = 0
+            image = image[..., [1, 2]]
             outputs = predictor(image)
+            image = np.pad(image, [[0, 0], [0, 0], [1, 0]])
             visualizer = Visualizer(
                 image,
                 metadata=metadata,

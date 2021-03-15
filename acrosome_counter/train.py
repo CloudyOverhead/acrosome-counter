@@ -63,7 +63,7 @@ def augment(record):
     image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
     classes = [bbox.label for bbox in boxes.bounding_boxes]
     boxes = np.array([[box.x1, box.y1, box.x2, box.y2] for box in boxes.items])
-    image[..., 0] = 0
+    image = image[..., [1, 2]]
     image = image.transpose(2, 0, 1).astype(np.float32)
 
     annotations = [

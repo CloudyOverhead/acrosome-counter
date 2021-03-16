@@ -33,7 +33,7 @@ def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     cfg.SOLVER.IMS_PER_BATCH = batch_size
     cfg.SOLVER.BASE_LR = learning_rate
     cfg.SOLVER.MAX_ITER = qty_iters
-    cfg.SOLVER.STEPS = []
+    cfg.SOLVER.STEPS = [4000, 6000]
 
     cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[1.0]]
     cfg.MODEL.PIXEL_MEAN = [103.53, 116.28]

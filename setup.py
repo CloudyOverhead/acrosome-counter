@@ -21,7 +21,7 @@ REQUIREMENTS = [
 
 setup(
     name="acrosome-counter",
-    version="0.0.0",
+    version="1.0",
     author="Jérome Simon, Camille Lavoie-Ouellet",
     author_email="jerome.simon@ete.inrs.ca",
     description="Count spermatozoa using deep learning.",

@@ -53,12 +53,13 @@ class Dataset:
 
         annotations = []
         if self.is_training:
-            boxes, classes = self.labels[filename]
-            for box, class_ in zip(boxes, classes):
+            boxes, classes, scores = self.labels[filename]
+            for box, class_, score in zip(boxes, classes, scores):
                 annotation = {
                     "bbox": box,
                     "bbox_mode": BoxMode.XYXY_ABS,
                     "category_id": class_,
+                    "score": score,
                 }
                 annotations.append(annotation)
 
@@ -104,7 +105,8 @@ def load_labels(annotations_path):
         if not exists(join(data_dir, "images", name)):
             continue
         boxes = []
-        attributes = []
+        classes = []
+        scores = []
         for box in image:
             boxes.append(
                 [
@@ -114,18 +116,25 @@ def load_labels(annotations_path):
                     box.get('ybr'),
                 ]
             )
-            attribute = next(box.iter('attribute'))
-            attributes.append(MAP_IDS[attribute.text])
+            attributes = box.iter('attribute')
+            attribute = next(attributes)
+            classes.append(MAP_IDS[attribute.text])
+            try:
+                attribute = next(attributes)
+                scores.append(float(attribute.text))
+            except StopIteration:
+                scores.append(1.)
         boxes = np.array(boxes, dtype=np.float16)
-        attributes = np.array(attributes, dtype=int)
-        labels[name] = (boxes, attributes)
+        classes = np.array(classes, dtype=int)
+        scores = np.array(scores, dtype=np.float16)
+        labels[name] = (boxes, classes, scores)
     return labels
 
 
 def filter_labels(labels, is_training):
     keep_names = []
     for name, label in labels.items():
-        boxes, _ = label
+        boxes, _, _ = label
         has_labels = boxes.size != 0
         do_keep = (
             (has_labels and is_training)

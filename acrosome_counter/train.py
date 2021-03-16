@@ -40,6 +40,7 @@ AUGMENTER = aug.Sequential(
     ]
 )
 
+
 class Trainer(DefaultTrainer):
     @classmethod
     def build_train_loader(cls, cfg):

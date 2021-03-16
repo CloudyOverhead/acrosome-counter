@@ -4,17 +4,10 @@
 from argparse import ArgumentParser
 from os import makedirs
 
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-from detectron2.engine import DefaultPredictor
-from detectron2.utils.visualizer import Visualizer
-from detectron2.data import MetadataCatalog
-
 from acrosome_counter.inputs import Dataset
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
-
-mpl.use('TkAgg')
+from acrosome_counter.predictor import Predictor
 
 
 def main(args):
@@ -30,25 +23,8 @@ def main(args):
         trainer.train()
     else:
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .7
-        predictor = DefaultPredictor(cfg)
-        metadata = MetadataCatalog.get("test")
-        for image_info in dataset:
-            image_path = image_info["file_name"]
-            image = plt.imread(image_path).copy()
-            image = image[..., [1, 2]]
-            outputs = predictor(image)
-            image = np.pad(image, [[0, 0], [0, 0], [1, 0]])
-            visualizer = Visualizer(
-                image,
-                metadata=metadata,
-                scale=.5,
-            )
-            out = visualizer.draw_instance_predictions(
-                outputs["instances"].to("cpu")
-            )
-            annotated_image = out.get_image()
-            plt.imshow(annotated_image)
-            plt.show()
+        predictor = Predictor(cfg)
+        predictor(dataset, plot=args.plot)
 
 
 if __name__ == '__main__':
@@ -58,5 +34,6 @@ if __name__ == '__main__':
     parser.add_argument('-it', '--qty_iters', default=1, type=int)
     parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
     parser.add_argument('--infer', action='store_true')
+    parser.add_argument('--plot', action='store_true')
     args = parser.parse_args()
     main(args)

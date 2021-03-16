@@ -24,13 +24,13 @@ class Dataset:
 
         if is_training:
             self.images_dir = join(data_dir, "images")
-            self.labels = load_labels(join(data_dir, "annotations.xml"))
-            self.labels = filter_labels(self.labels, is_training)
+            self.labels = self.load_labels("annotations.xml")
+            self.labels = self.filter_labels(self.labels, is_training)
             self.filenames = [filename for filename in self.labels.keys()]
         else:
             self.images_dir = data_dir
             if exists(join(data_dir, "predictions.xml")):
-                self.labels = load_labels(join(data_dir, "predictions.xml"))
+                self.labels = self.load_labels("predictions.xml")
             else:
                 self.labels = None
             self.filenames = []
@@ -75,6 +75,55 @@ class Dataset:
             "annotations": annotations,
         }
 
+    def load_labels(self, annotations_file):
+        annotations_path = join(self.data_dir, annotations_file)
+        data_dir, _ = split(annotations_path)
+        annotations = xml_parse(annotations_path)
+        root = annotations.getroot()
+        labels = {}
+        for image in root.findall('image'):
+            name = image.attrib.get('name')
+            if not exists(join(self.images_dir, name)):
+                continue
+            boxes = []
+            classes = []
+            scores = []
+            for box in image:
+                boxes.append(
+                    [
+                        box.get('xtl'),
+                        box.get('ytl'),
+                        box.get('xbr'),
+                        box.get('ybr'),
+                    ]
+                )
+                attributes = box.iter('attribute')
+                attribute = next(attributes)
+                classes.append(MAP_IDS[attribute.text])
+                try:
+                    attribute = next(attributes)
+                    scores.append(float(attribute.text))
+                except StopIteration:
+                    scores.append(1.)
+            boxes = np.array(boxes, dtype=np.float16)
+            classes = np.array(classes, dtype=int)
+            scores = np.array(scores, dtype=np.float16)
+            labels[name] = (boxes, classes, scores)
+        return labels
+
+    def filter_labels(self, labels, is_training):
+        keep_names = []
+        for name, label in labels.items():
+            boxes, _, _ = label
+            has_labels = boxes.size != 0
+            do_keep = (
+                (has_labels and is_training)
+                or (not has_labels and not is_training)
+            )
+            if do_keep:
+                keep_names.append(name)
+        return {name: labels[name] for name in keep_names}
+
     def register(self):
         name = "train" if self.is_training else "test"
         DatasetCatalog.register(name, lambda: self)
@@ -98,52 +147,3 @@ class Dataset:
             plt.text(0, 0, text_info)
             visualize(image, instances, self.metadata)
 
-
-def load_labels(annotations_path):
-    data_dir, _ = split(annotations_path)
-    annotations = xml_parse(annotations_path)
-    root = annotations.getroot()
-    labels = {}
-    for image in root.findall('image'):
-        name = image.attrib.get('name')
-        if not exists(join(data_dir, "images", name)):
-            continue
-        boxes = []
-        classes = []
-        scores = []
-        for box in image:
-            boxes.append(
-                [
-                    box.get('xtl'),
-                    box.get('ytl'),
-                    box.get('xbr'),
-                    box.get('ybr'),
-                ]
-            )
-            attributes = box.iter('attribute')
-            attribute = next(attributes)
-            classes.append(MAP_IDS[attribute.text])
-            try:
-                attribute = next(attributes)
-                scores.append(float(attribute.text))
-            except StopIteration:
-                scores.append(1.)
-        boxes = np.array(boxes, dtype=np.float16)
-        classes = np.array(classes, dtype=int)
-        scores = np.array(scores, dtype=np.float16)
-        labels[name] = (boxes, classes, scores)
-    return labels
-
-
-def filter_labels(labels, is_training):
-    keep_names = []
-    for name, label in labels.items():
-        boxes, _, _ = label
-        has_labels = boxes.size != 0
-        do_keep = (
-            (has_labels and is_training)
-            or (not has_labels and not is_training)
-        )
-        if do_keep:
-            keep_names.append(name)
-    return {name: labels[name] for name in keep_names}

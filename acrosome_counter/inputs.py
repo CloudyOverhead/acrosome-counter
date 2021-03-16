@@ -23,7 +23,7 @@ class Dataset:
         self.labels = filter_labels(self.labels, is_training)
         self.filenames = [filename for filename in self.labels.keys()]
 
-        self.register()
+        self.metadata = self.register()
 
     def __len__(self):
         return len(self.filenames)

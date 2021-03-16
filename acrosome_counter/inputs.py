@@ -9,6 +9,8 @@ from matplotlib import pyplot as plt
 from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
+from acrosome_counter.visualize import visualize
+
 MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
 QTY_CLASSES = len(MAP_NAMES)
@@ -63,6 +65,22 @@ class Dataset:
         metadata = MetadataCatalog.get(name)
         metadata.set(thing_classes=MAP_NAMES)
         return metadata
+
+    def quality_control(self, dataset):
+        for image_info in dataset:
+            image_path = image_info["file_name"]
+            image = plt.imread(image_path).copy()
+            annotations = image_info["annotations"]
+            class_ids = [
+                annotation["category_id"] for annotation in annotations
+            ]
+            _, quantities = np.unique(class_ids, return_counts=True)
+            text_info = ", ".join(
+                f"{class_}: {quantity}"
+                for class_, quantity in zip(MAP_NAMES, quantities)
+            )
+            plt.text(0, 0, text_info)
+            visualize(image, annotations, self.metadata)
 
 
 def load_labels(annotations_path):

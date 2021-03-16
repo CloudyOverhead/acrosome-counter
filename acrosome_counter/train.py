@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Augment image upon training."""
 
 from copy import deepcopy
 

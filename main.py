@@ -3,6 +3,7 @@
 
 from argparse import ArgumentParser
 from os import makedirs
+from os.path import join
 
 from acrosome_counter.inputs import Dataset
 from acrosome_counter.build_model import build_cfg
@@ -25,6 +26,7 @@ def main(args):
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .7
         predictor = Predictor(cfg)
         predictor(dataset, plot=args.plot)
+        predictor.export(join(args.data_dir, "predictions.xml"))
 
 
 if __name__ == '__main__':

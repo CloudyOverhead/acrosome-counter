@@ -132,7 +132,7 @@ class Dataset:
         metadata.set(thing_classes=MAP_NAMES)
         return metadata
 
-    def quality_control(self):
+    def review(self):
         for image_info in self:
             image_name = image_info["file_name"]
             image_path = join(self.images_dir, image_name)

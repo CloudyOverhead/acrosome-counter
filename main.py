@@ -34,9 +34,9 @@ def main(args):
         predictor.export_xml()
         predictor.export_csv()
 
-    if args.quality_control:
+    if args.review:
         dataset = Dataset(args.data_dir, is_training=False)
-        dataset.quality_control()
+        dataset.review()
 
 
 if __name__ == '__main__':
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--infer', action='store_true')
     parser.add_argument('--plot', action='store_true')
-    parser.add_argument('-qc', '--quality_control', action='store_true')
+    parser.add_argument('--review', action='store_true')
     args = parser.parse_args()
     main(args)

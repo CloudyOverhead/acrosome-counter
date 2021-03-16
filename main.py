@@ -3,16 +3,14 @@
 
 from argparse import ArgumentParser
 from os import makedirs
-from os.path import join
 
-import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from detectron2.engine import DefaultPredictor
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 
-from acrosome_counter.inputs import Dataset, MAP_IDS
+from acrosome_counter.inputs import Dataset
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
 

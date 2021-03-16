@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Fetch and process inputs to the network."""
 
-from os.path import join, exists, split
+from os import walk
+from os.path import join, exists, split, relpath
 from xml.etree.ElementTree import parse as xml_parse
 
 import numpy as np
@@ -21,9 +22,19 @@ class Dataset:
         self.data_dir = data_dir
         self.is_training = is_training
 
-        self.labels = load_labels(join(data_dir, "annotations.xml"))
-        self.labels = filter_labels(self.labels, is_training)
-        self.filenames = [filename for filename in self.labels.keys()]
+        if is_training:
+            self.images_dir = join(data_dir, "images")
+            self.labels = load_labels(join(data_dir, "annotations.xml"))
+            self.labels = filter_labels(self.labels, is_training)
+            self.filenames = [filename for filename in self.labels.keys()]
+        else:
+            self.images_dir = data_dir
+            self.filenames = []
+            for root, _, files in walk(data_dir):
+                for file in files:
+                    if 'tif' in file.split(".")[-1]:
+                        filepath = relpath(join(root, file), data_dir)
+                        self.filenames.append(filepath)
 
         self.metadata = self.register()
 
@@ -36,7 +47,7 @@ class Dataset:
 
     def __getitem__(self, idx):
         filename = self.filenames[idx]
-        filepath = join(self.data_dir, "images", filename)
+        filepath = join(self.images_dir, filename)
         image = plt.imread(filepath)
         height, width, _ = image.shape
 

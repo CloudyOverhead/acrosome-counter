@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Run inference and save predictions to disk."""
 
-from os.path import split
+from os.path import join, split
 from xml.etree.ElementTree import ElementTree, Element, SubElement
 
 import matplotlib as mpl
@@ -36,8 +36,10 @@ class Predictor(DefaultPredictor):
         self.metadata = MetadataCatalog.get("test")
         self.metadata.thing_colors = CLASSES_COLORS
         self.results = {}
+        self.dataset = None
 
     def __call__(self, dataset, plot=True):
+        self.dataset = dataset
         self.results = {}
         for image_info in dataset:
             image_path = image_info["file_name"]
@@ -58,7 +60,10 @@ class Predictor(DefaultPredictor):
                 plt.imshow(annotated_image)
                 plt.show()
 
-    def export_xml(self, dest_path):
+    def export_xml(self, dest_path=None):
+        if dest_path is None:
+            dest_path = join(self.dataset.data_dir, "predictions.xml")
+
         root = Element("annotations")
 
         SubElement(root, "version").text = "1.1"
@@ -106,7 +111,10 @@ class Predictor(DefaultPredictor):
         file = ElementTree(root)
         file.write(dest_path)
 
-    def export_csv(self, dest_path):
+    def export_csv(self, dest_path=None):
+        if dest_path is None:
+            dest_path = join(self.dataset.data_dir, "predictions.csv")
+
         quantities = pd.DataFrame(
             [], columns=["intact", "perdu", "intermediaire"],
         )

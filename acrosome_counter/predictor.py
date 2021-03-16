@@ -28,7 +28,7 @@ class Predictor(DefaultPredictor):
         self.results = {}
         for image_info in dataset:
             image_path = image_info["file_name"]
-            image = plt.imread(image_path).copy()
+            image = plt.imread(join(dataset.images_dir, image_path)).copy()
             input_image = image[..., [2, 1]]
             outputs = super().__call__(input_image)
             self.results[image_path] = outputs['instances']
@@ -44,14 +44,13 @@ class Predictor(DefaultPredictor):
         SubElement(root, "version").text = "1.1"
 
         for id, (image_path, outputs) in enumerate(self.results.items()):
-            _, image_name = split(image_path)
             height, width = outputs.image_size
             image_element = SubElement(
                 root,
                 "image",
                 height=str(height),
                 width=str(width),
-                name=image_name,
+                name=image_path,
                 id=str(id),
             )
             boxes = outputs.pred_boxes

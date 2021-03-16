@@ -68,7 +68,7 @@ class Dataset:
                 annotations.append(annotation)
 
         return {
-            "file_name": filepath,
+            "file_name": filename,
             "image_id": idx,
             "height": height,
             "width": width,

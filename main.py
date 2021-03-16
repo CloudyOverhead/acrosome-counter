@@ -12,18 +12,24 @@ from acrosome_counter.predictor import Predictor
 
 
 def main(args):
-    is_training = not args.infer
-    dataset = Dataset(args.data_dir, is_training)
-    cfg = build_cfg(
-        is_training, args.batch_size, args.learning_rate, args.qty_iters,
-    )
-    if is_training:
+    if args.train:
+        is_training = True
+        dataset = Dataset(args.data_dir, is_training)
+        cfg = build_cfg(
+            is_training, args.batch_size, args.learning_rate, args.qty_iters,
+        )
         makedirs(cfg.OUTPUT_DIR, exist_ok=True)
         trainer = Trainer(cfg)
         trainer.resume_or_load(resume=False)
         trainer.train()
-    else:
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .7
+
+    if args.infer:
+        is_training = False
+        dataset = Dataset(args.data_dir, is_training)
+        cfg = build_cfg(
+            is_training, args.batch_size, args.learning_rate, args.qty_iters,
+        )
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .3
         predictor = Predictor(cfg)
         predictor(dataset, plot=args.plot)
         predictor.export_xml()
@@ -36,6 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs', '--batch_size', default=1, type=int)
     parser.add_argument('-it', '--qty_iters', default=1, type=int)
     parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
+    parser.add_argument('--train', action='store_true')
     parser.add_argument('--infer', action='store_true')
     parser.add_argument('--plot', action='store_true')
     args = parser.parse_args()

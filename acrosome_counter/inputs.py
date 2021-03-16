@@ -29,6 +29,10 @@ class Dataset:
             self.filenames = [filename for filename in self.labels.keys()]
         else:
             self.images_dir = data_dir
+            if exists(join(data_dir, "predictions.xml")):
+                self.labels = load_labels(join(data_dir, "predictions.xml"))
+            else:
+                self.labels = None
             self.filenames = []
             for root, _, files in walk(data_dir):
                 for file in files:

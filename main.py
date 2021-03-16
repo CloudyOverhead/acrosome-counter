@@ -36,7 +36,7 @@ def main(args):
         predictor.export_csv()
 
     if args.quality_control:
-        dataset = Dataset(args.data_dir, is_training=True)
+        dataset = Dataset(args.data_dir, is_training=False)
         dataset.quality_control()
 
 

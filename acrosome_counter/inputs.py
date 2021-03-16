@@ -60,8 +60,9 @@ class Dataset:
     def register(self):
         name = "train" if self.is_training else "test"
         DatasetCatalog.register(name, lambda: self)
-        MetadataCatalog.get(name).set(thing_classes=MAP_NAMES)
-        return MetadataCatalog.get(name)
+        metadata = MetadataCatalog.get(name)
+        metadata.set(thing_classes=MAP_NAMES)
+        return metadata
 
 
 def load_labels(annotations_path):

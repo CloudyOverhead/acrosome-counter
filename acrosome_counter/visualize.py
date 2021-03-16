@@ -4,8 +4,6 @@
 from matplotlib import pyplot as plt
 from detectron2.utils.visualizer import Visualizer
 
-from acrosome_counter.inputs import MAP_IDS
-
 CLASSES_COLORS = [(0, 1, 0), (1, 1, 1), (0, 0, 1)]
 
 
@@ -13,7 +11,9 @@ class Visualizer(Visualizer):
     def overlay_instances(self, **kwargs):
         labels = [label.split(" ")[0] for label in kwargs['labels']]
         percentages = [label.split(" ")[1] for label in kwargs['labels']]
-        category_ids = [MAP_IDS[label] for label in labels]
+        category_ids = [
+            self.metadata.thing_classes.index(label) for label in labels
+        ]
         kwargs['assigned_colors'] = [
             self.metadata.thing_colors[c] for c in category_ids
         ]

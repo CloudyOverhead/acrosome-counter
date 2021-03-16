@@ -1,70 +1,78 @@
 # -*- coding: utf-8 -*-
-"""Launch training on a TensorFlow Model Garden model.
+"""Augment image upon training."""
 
-This is modified from Model Garden's "Eager Few Shot Object Detection Colab"
-(github.com/tensorflow/models/blob/master/research/object_detection
-/colab_tutorials/eager_few_shot_od_training_tf2_colab.ipynb).
-"""
+from copy import deepcopy
 
-import tensorflow as tf
+import torch
+import numpy as np
+from matplotlib import pyplot as plt
+from detectron2.engine import DefaultTrainer
+from detectron2.data import build_detection_train_loader
+from detectron2.data import detection_utils as utils
+from detectron2.structures import BoxMode
+from imgaug import augmenters as aug
+from imgaug.parameters import Normal, TruncatedNormal
+from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
+
+AUGMENTER = aug.Sequential(
+    [
+        aug.Add(Normal(0, 10), per_channel=True),
+        aug.Multiply(TruncatedNormal(1, .1, low=.5, high=1.5)),
+        aug.GaussianBlur((0, 2)),
+        aug.Fliplr(.5),
+        aug.Flipud(.5),
+        aug.Affine(
+            scale={
+                'x': TruncatedNormal(1, .1, low=.8, high=1.2),
+                'y': TruncatedNormal(1, .1, low=.8, high=1.2),
+            },
+            translate_percent={
+                'x': TruncatedNormal(0, .1, low=-.2, high=.2),
+                'y': TruncatedNormal(0, .1, low=-.2, high=.2),
+            },
+            rotate=(-180, 180),
+            shear={
+                'x': TruncatedNormal(0, 10, low=-30, high=30),
+                'y': TruncatedNormal(0, 10, low=-30, high=30),
+            },
+            cval=(0, 255),
+        ),
+        aug.CoarseSaltAndPepper((.01, .1), size_percent=(5E-3, 5E-2)),
+    ]
+)
 
 
-def get_model_train_step_function(
-    model, optimizer, vars_to_fine_tune, batch_size,
-):
-    """Get a tf.function for training step."""
-    @tf.function
-    def train_step_fn(images, shapes):
-        """A single training iteration.
-
-        :param images: A list of [1, height, width, 3] Tensor of type
-            tf.float32. Note that the height and width can vary across images,
-            as they are reshaped within this function to be 320x320.
-        :param boxes: A list of Tensors of shape [N_i, 4] with type tf.float32
-            representing groundtruth boxes for each image in the batch.
-        :param classes: A list of Tensors of shape [N_i, num_classes] with type
-            tf.float32 representing groundtruth boxes for each image in the
-            batch.
-
-        :return: The total loss for the input batch.
-        """
-        with tf.GradientTape() as tape:
-            prediction_dict = model.predict(images, shapes)
-            losses_dict = model.loss(prediction_dict, shapes)
-            total_loss = sum(losses_dict.values())
-            gradients = tape.gradient(total_loss, vars_to_fine_tune)
-            optimizer.apply_gradients(zip(gradients, vars_to_fine_tune))
-        return total_loss
-
-    return train_step_fn
+class Trainer(DefaultTrainer):
+    @classmethod
+    def build_train_loader(cls, cfg):
+        return build_detection_train_loader(cfg, mapper=augment)
 
 
-def train(model, sequence, qty_epochs, learning_rate):
-    tf.keras.backend.set_learning_phase(True)
+def augment(record):
+    record = deepcopy(record)
+    image = plt.imread(record["file_name"])
+    annotations = record["annotations"]
 
-    trainable_variables = model.trainable_variables
-    prefixes_to_train = ['RPNConv', 'FirstStageBoxPredictor', 'mask_rcnn']
-    to_fine_tune = []
-    for var in trainable_variables:
-        if any([var.name.startswith(prefix) for prefix in prefixes_to_train]):
-            to_fine_tune.append(var)
-
-    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    train_step_fn = get_model_train_step_function(
-        model, optimizer, to_fine_tune, sequence.batch_size,
+    boxes = [annotation["bbox"] for annotation in annotations]
+    classes = [annotation["category_id"] for annotation in annotations]
+    boxes = BoundingBoxesOnImage(
+        [
+            BoundingBox(*box, label=class_)
+            for box, class_ in zip(boxes, classes)
+        ],
+        shape=image.shape,
     )
+    image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
+    classes = [bbox.label for bbox in boxes.bounding_boxes]
+    boxes = np.array([[box.x1, box.y1, box.x2, box.y2] for box in boxes.items])
+    image = image[..., [2, 1]]
+    image = image.transpose(2, 0, 1).astype(np.float32)
 
-    for epoch in range(qty_epochs):
-        images, (boxes, classes) = sequence[epoch]
-        model.provide_groundtruth(
-            groundtruth_boxes_list=boxes,
-            groundtruth_classes_list=classes,
-        )
-        inputs = [model.preprocess(image) for image in images]
-        images = tf.concat([input[0] for input in inputs], axis=0)
-        shapes = tf.concat([input[1] for input in inputs], axis=0)
-        total_loss = train_step_fn(images, shapes)
-        print(
-            f"Epoch {epoch+1} of {qty_epochs}, loss={total_loss.numpy()}",
-            flush=True,
-        )
+    annotations = [
+        {"bbox": box, "bbox_mode": BoxMode.XYXY_ABS, "category_id": class_}
+        for box, class_ in zip(boxes, classes)
+    ]
+    record["image"] = torch.as_tensor(image)
+    instances = utils.annotations_to_instances(annotations, image.shape[1:])
+    record["instances"] = utils.filter_empty_instances(instances)
+    return record

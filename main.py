@@ -2,79 +2,52 @@
 """Launch training and inference."""
 
 from argparse import ArgumentParser
-from os.path import join
+from os import makedirs
 
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-import tensorflow as tf
-from tensorflow.compat.v2.train import Checkpoint
-from object_detection.utils.visualization_utils import (
-    visualize_boxes_and_labels_on_image_array as visualize
-)
-
-from acrosome_counter.inputs import Sequence, MAP_ACROSOME
-from acrosome_counter.build_model import build_model, restore
-from acrosome_counter.train import train
-
-PRETRAINED_CHECKPOINT = "faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8"
-PRETRAINED_CHECKPOINT = join(PRETRAINED_CHECKPOINT, 'checkpoint', 'ckpt-0')
-
-mpl.use('TkAgg')
+from acrosome_counter.inputs import Dataset
+from acrosome_counter.build_model import build_cfg
+from acrosome_counter.train import Trainer
+from acrosome_counter.predictor import Predictor
 
 
 def main(args):
-    is_training = not args.infer
-    sequence = Sequence(args.data_dir, args.batch_size, is_training)
-    log_dir = join(".", "logs")
-    model = build_model(not args.infer)
-    if is_training:
-        restore_from = PRETRAINED_CHECKPOINT
-    else:
-        restore_from = join(log_dir, "ckpt-1")
-    restore(model, restore_from, is_training)
-    if not args.infer:
-        checkpoint = Checkpoint(model=model)
-        manager = tf.train.CheckpointManager(
-            checkpoint, log_dir, max_to_keep=1,
+    if args.train:
+        is_training = True
+        dataset = Dataset(args.data_dir, is_training)
+        cfg = build_cfg(
+            is_training, args.batch_size, args.learning_rate, args.qty_iters,
         )
-        train(model, sequence, args.epochs, args.learning_rate)
-        manager.save()
-    else:
-        images, _ = sequence[0]
-        for image in images:
-            predictions = model.call(image)
-            predictions = {
-                key: value[0].numpy() for key, value in predictions.items()
-            }
-            boxes = predictions['detection_boxes']
-            classes = predictions['detection_classes'].astype(int).tolist()
-            scores = predictions['detection_scores']
-            category_index = {
-                id: {'id': id, 'name': name}
-                for name, id in MAP_ACROSOME.items()
-            }
-            annotated_image = image[0].numpy().copy()
-            visualize(
-                annotated_image,
-                boxes,
-                classes,
-                scores,
-                category_index,
-                use_normalized_coordinates=True,
-                min_score_thresh=0.8,
-                max_boxes_to_draw=None,
-            )
-            annotated_image /= 255
-            plt.imshow(annotated_image)
-            plt.show()
+        makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+        trainer = Trainer(cfg)
+        trainer.resume_or_load(resume=False)
+        trainer.train()
+
+    if args.infer:
+        is_training = False
+        dataset = Dataset(args.data_dir, is_training)
+        cfg = build_cfg(
+            is_training, args.batch_size, args.learning_rate, args.qty_iters,
+        )
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .3
+        predictor = Predictor(cfg)
+        predictor(dataset, plot=args.plot)
+        predictor.export_xml()
+        predictor.export_csv()
+
+    if args.quality_control:
+        dataset = Dataset(args.data_dir, is_training=False)
+        dataset.quality_control()
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('data_dir', type=str)
-    parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--epochs', default=1, type=int)
-    parser.add_argument('-lr', '--learning_rate', default=1E-3, type=float)
+    parser.add_argument('-bs', '--batch_size', default=1, type=int)
+    parser.add_argument('-it', '--qty_iters', default=1, type=int)
+    parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
+    parser.add_argument('--train', action='store_true')
     parser.add_argument('--infer', action='store_true')
+    parser.add_argument('--plot', action='store_true')
+    parser.add_argument('-qc', '--quality_control', action='store_true')
     args = parser.parse_args()
     main(args)

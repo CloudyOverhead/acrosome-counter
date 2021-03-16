@@ -23,7 +23,6 @@ def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     )
     cfg.DATASETS.TRAIN = ("train",)
     cfg.DATASETS.TEST = ()
-    cfg.INPUT.FORMAT = "RGB"
     cfg.DATALOADER.NUM_WORKERS = 1
     cfg.OUTPUT_DIR = LOG_DIR
     if is_training:
@@ -37,7 +36,7 @@ def build_cfg(is_training, batch_size, learning_rate, qty_iters):
     cfg.SOLVER.STEPS = []
 
     cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[1.0]]
-    cfg.MODEL.PIXEL_MEAN = [116.28, 103.53]
+    cfg.MODEL.PIXEL_MEAN = [103.53, 116.28]
     cfg.MODEL.PIXEL_STD = [1.0, 1.0]
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = QTY_CLASSES

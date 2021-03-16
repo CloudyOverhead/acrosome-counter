@@ -64,7 +64,7 @@ def augment(record):
     image, boxes = AUGMENTER(image=image, bounding_boxes=boxes)
     classes = [bbox.label for bbox in boxes.bounding_boxes]
     boxes = np.array([[box.x1, box.y1, box.x2, box.y2] for box in boxes.items])
-    image = image[..., [1, 2]]
+    image = image[..., [2, 1]]
     image = image.transpose(2, 0, 1).astype(np.float32)
 
     annotations = [
@@ -72,6 +72,6 @@ def augment(record):
         for box, class_ in zip(boxes, classes)
     ]
     record["image"] = torch.as_tensor(image)
-    instances = utils.annotations_to_instances(annotations, image.shape[:2])
+    instances = utils.annotations_to_instances(annotations, image.shape[1:])
     record["instances"] = utils.filter_empty_instances(instances)
     return record

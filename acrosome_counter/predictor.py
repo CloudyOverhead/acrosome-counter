@@ -22,7 +22,7 @@ class Predictor(DefaultPredictor):
         for image_info in dataset:
             image_path = image_info["file_name"]
             image = plt.imread(image_path).copy()
-            input_image = image[..., [1, 2]]
+            input_image = image[..., [2, 1]]
             outputs = super().__call__(input_image)
             visualizer = Visualizer(
                 image,

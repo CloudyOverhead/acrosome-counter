@@ -90,7 +90,7 @@ class Predictor(DefaultPredictor):
             dest_path = join(self.dataset.data_dir, "predictions.csv")
 
         quantities = pd.DataFrame(
-            [], columns=["intact", "perdu", "intermediaire"],
+            [], columns=["intact", "intermediaire", "perdu"],
         )
         for image_path, outputs in self.results.items():
             _, image_name = split(image_path)

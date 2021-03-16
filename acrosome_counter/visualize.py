@@ -21,16 +21,14 @@ class Visualizer(Visualizer):
         return super().overlay_instances(**kwargs)
 
 
-def visualize(image, outputs, metadata):
+def visualize(image, instances, metadata):
     metadata.thing_colors = CLASSES_COLORS
     visualizer = Visualizer(
         image,
         metadata=metadata,
         scale=3.0,
     )
-    out = visualizer.draw_instance_predictions(
-        outputs["instances"].to("cpu")
-    )
+    out = visualizer.draw_instance_predictions(instances)
     annotated_image = out.get_image()
     plt.imshow(annotated_image)
     plt.show()

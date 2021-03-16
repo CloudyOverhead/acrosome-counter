@@ -33,7 +33,7 @@ class Predictor(DefaultPredictor):
             outputs = super().__call__(input_image)
             self.results[image_path] = outputs['instances']
             if plot:
-                visualize(image, outputs, self.metadata)
+                visualize(image, outputs["instances"].to("cpu"), self.metadata)
 
     def export_xml(self, dest_path=None):
         if dest_path is None:

@@ -96,7 +96,7 @@ class Dataset:
                 for class_, quantity in zip(MAP_NAMES, quantities)
             )
             plt.text(0, 0, text_info)
-            visualize(image, annotations, self.metadata)
+            visualize(image, instances, self.metadata)
 
 
 def load_labels(annotations_path):

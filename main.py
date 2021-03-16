@@ -27,6 +27,7 @@ def main(args):
         predictor = Predictor(cfg)
         predictor(dataset, plot=args.plot)
         predictor.export_xml(join(args.data_dir, "predictions.xml"))
+        predictor.export_csv(join(args.data_dir, "predictions.csv"))
 
 
 if __name__ == '__main__':

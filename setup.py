@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-from subprocess import run
-from os import chdir
-from os.path import join, pardir, abspath, exists
-from shutil import copyfile
 
 
 with open("README.md", "r") as fh:
@@ -20,6 +16,7 @@ REQUIREMENTS = [
     "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
     "matplotlib",
     "imgaug",
+    "pandas",
 ]
 
 setup(

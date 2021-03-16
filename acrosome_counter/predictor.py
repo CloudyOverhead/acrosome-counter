@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 from detectron2.engine import DefaultPredictor
 from detectron2.data import MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
+import pandas as pd
 
 from acrosome_counter.inputs import MAP_IDS, MAP_NAMES
 
@@ -104,3 +105,19 @@ class Predictor(DefaultPredictor):
 
         file = ElementTree(root)
         file.write(dest_path)
+
+    def export_csv(self, dest_path):
+        quantities = pd.DataFrame(
+            [], columns=["intact", "perdu", "intermediaire"],
+        )
+        for image_path, outputs in self.results.items():
+            _, image_name = split(image_path)
+            quantities.loc[image_name] = [0, 0, 0]
+            classes = outputs.pred_classes
+            scores = outputs.scores
+            for class_, score in zip(classes, scores):
+                class_ = class_.data.item()
+                score = score.data.item()
+                class_name = MAP_NAMES[class_]
+                quantities.loc[image_name, class_name] += 1
+        quantities.to_csv(dest_path)

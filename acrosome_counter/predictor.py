@@ -10,13 +10,30 @@ from detectron2.engine import DefaultPredictor
 from detectron2.data import MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
 
+from acrosome_counter.inputs import MAP_IDS
+
 mpl.use('TkAgg')
+
+CLASSES_COLORS = [(0, 1, 0), (1, 1, 1), (0, 0, 1)]
+
+
+class Visualizer(Visualizer):
+    def overlay_instances(self, **kwargs):
+        labels = [label.split(" ")[0] for label in kwargs['labels']]
+        percentages = [label.split(" ")[1] for label in kwargs['labels']]
+        category_ids = [MAP_IDS[label] for label in labels]
+        kwargs['assigned_colors'] = [
+            self.metadata.thing_colors[c] for c in category_ids
+        ]
+        kwargs['labels'] = percentages
+        return super().overlay_instances(**kwargs)
 
 
 class Predictor(DefaultPredictor):
     def __init__(self, cfg):
         super().__init__(cfg)
         self.metadata = MetadataCatalog.get("test")
+        self.metadata.thing_colors = CLASSES_COLORS
 
     def __call__(self, dataset, plot=True):
         for image_info in dataset:
@@ -27,7 +44,7 @@ class Predictor(DefaultPredictor):
             visualizer = Visualizer(
                 image,
                 metadata=self.metadata,
-                scale=.5,
+                scale=3.0,
             )
             out = visualizer.draw_instance_predictions(
                 outputs["instances"].to("cpu")

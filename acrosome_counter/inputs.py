@@ -11,6 +11,7 @@ from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
 
 from acrosome_counter.visualize import visualize
+from detectron2.structures.instances import Instances
 
 MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
@@ -56,7 +57,7 @@ class Dataset:
         height, width, _ = image.shape
 
         annotations = []
-        if self.is_training:
+        if self.labels:
             boxes, classes, scores = self.labels[filename]
             for box, class_, score in zip(boxes, classes, scores):
                 annotation = {
@@ -131,19 +132,26 @@ class Dataset:
         metadata.set(thing_classes=MAP_NAMES)
         return metadata
 
-    def quality_control(self, dataset):
-        for image_info in dataset:
-            image_path = image_info["file_name"]
+    def quality_control(self):
+        for image_info in self:
+            image_name = image_info["file_name"]
+            image_path = join(self.images_dir, image_name)
             image = plt.imread(image_path).copy()
             annotations = image_info["annotations"]
-            class_ids = [
-                annotation["category_id"] for annotation in annotations
-            ]
-            _, quantities = np.unique(class_ids, return_counts=True)
+            boxes = [annotation["bbox"] for annotation in annotations]
+            ids = [annotation["category_id"] for annotation in annotations]
+            _, quantities = np.unique(ids, return_counts=True)
             text_info = ", ".join(
                 f"{class_}: {quantity}"
                 for class_, quantity in zip(MAP_NAMES, quantities)
             )
+            scores = [annotation["score"] for annotation in annotations]
             plt.text(0, 0, text_info)
+            image_size = (image_info["height"], image_info["width"])
+            instances = Instances(
+                image_size=image_size,
+                pred_boxes=boxes,
+                pred_classes=ids,
+                scores=scores,
+            )
             visualize(image, instances, self.metadata)
-

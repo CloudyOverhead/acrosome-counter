@@ -3,7 +3,6 @@
 
 from argparse import ArgumentParser
 from os import makedirs
-from os.path import join
 
 from acrosome_counter.inputs import Dataset
 from acrosome_counter.build_model import build_cfg

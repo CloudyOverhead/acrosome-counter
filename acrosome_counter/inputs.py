@@ -146,7 +146,7 @@ class Dataset:
                 for class_, quantity in zip(MAP_NAMES, quantities)
             )
             scores = [annotation["score"] for annotation in annotations]
-            plt.text(0, 0, text_info)
+            plt.title(text_info)
             image_size = (image_info["height"], image_info["width"])
             instances = Instances(
                 image_size=image_size,

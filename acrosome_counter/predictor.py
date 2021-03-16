@@ -57,7 +57,7 @@ class Predictor(DefaultPredictor):
                 plt.imshow(annotated_image)
                 plt.show()
 
-    def export(self, dest_path):
+    def export_xml(self, dest_path):
         root = Element("annotations")
 
         SubElement(root, "version").text = "1.1"

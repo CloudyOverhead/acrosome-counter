@@ -26,7 +26,7 @@ def main(args):
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = .7
         predictor = Predictor(cfg)
         predictor(dataset, plot=args.plot)
-        predictor.export(join(args.data_dir, "predictions.xml"))
+        predictor.export_xml(join(args.data_dir, "predictions.xml"))
 
 
 if __name__ == '__main__':

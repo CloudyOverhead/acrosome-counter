@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Launch training and inference."""
 
-from argparse import ArgumentParser
 from os import makedirs
+from argparse import ArgumentParser
 
 from acrosome_counter.inputs import Dataset
 from acrosome_counter.build_model import build_cfg

@@ -9,9 +9,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
-
-from acrosome_counter.visualize import visualize
 from detectron2.structures.instances import Instances
+
+from .visualize import visualize
 
 MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}

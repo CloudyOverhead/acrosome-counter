@@ -10,8 +10,8 @@ from detectron2.engine import DefaultPredictor
 from detectron2.data import MetadataCatalog
 import pandas as pd
 
-from acrosome_counter.inputs import MAP_NAMES
-from acrosome_counter.visualize import visualize
+from .inputs import MAP_NAMES
+from .visualize import visualize
 
 mpl.use('TkAgg')
 

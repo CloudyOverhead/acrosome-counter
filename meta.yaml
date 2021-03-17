@@ -1,5 +1,5 @@
 package:
-  name: acrosome_counter
+  name: acrosome-counter
   version: 1.0
 
 dependencies:

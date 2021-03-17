@@ -27,11 +27,12 @@ class Predictor(DefaultPredictor):
         self.dataset = dataset
         self.results = {}
         for image_info in dataset:
-            image_path = image_info["file_name"]
-            image = plt.imread(join(dataset.images_dir, image_path)).copy()
+            filename = image_info["filename"]
+            filepath = join(dataset.images_dir, filename)
+            image = plt.imread(filepath).copy()
             input_image = image[..., [2, 1]]
             outputs = super().__call__(input_image)
-            self.results[image_path] = outputs['instances']
+            self.results[filename] = outputs['instances']
             if plot:
                 visualize(image, outputs["instances"].to("cpu"), self.metadata)
 

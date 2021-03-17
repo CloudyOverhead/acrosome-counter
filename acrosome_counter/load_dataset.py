@@ -38,8 +38,8 @@ class Dataset:
             for root, _, files in walk(data_dir):
                 for file in files:
                     if 'tif' in file.split(".")[-1]:
-                        filepath = relpath(join(root, file), data_dir)
-                        self.filenames.append(filepath)
+                        filename = relpath(join(root, file), data_dir)
+                        self.filenames.append(filename)
 
         self.metadata = self.register()
 
@@ -57,7 +57,7 @@ class Dataset:
         height, width, _ = image.shape
 
         annotations = []
-        if self.labels:
+        try:
             boxes, classes, scores = self.labels[filename]
             for box, class_, score in zip(boxes, classes, scores):
                 annotation = {
@@ -67,9 +67,12 @@ class Dataset:
                     "score": score,
                 }
                 annotations.append(annotation)
+        except KeyError:
+            pass
 
         return {
-            "file_name": filename,
+            "filename": filename,
+            "filepath": filepath,
             "image_id": idx,
             "height": height,
             "width": width,
@@ -136,9 +139,8 @@ class Dataset:
 
     def review(self):
         for image_info in self:
-            image_name = image_info["file_name"]
-            image_path = join(self.images_dir, image_name)
-            image = plt.imread(image_path).copy()
+            filepath = image_info["filepath"]
+            image = plt.imread(filepath).copy()
             annotations = image_info["annotations"]
             boxes = [annotation["bbox"] for annotation in annotations]
             ids = [annotation["category_id"] for annotation in annotations]

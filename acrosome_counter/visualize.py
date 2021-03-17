@@ -31,4 +31,5 @@ def visualize(image, instances, metadata):
     out = visualizer.draw_instance_predictions(instances)
     annotated_image = out.get_image()
     plt.imshow(annotated_image)
+    plt.axis('off')
     plt.show()

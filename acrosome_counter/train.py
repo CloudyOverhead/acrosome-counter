@@ -50,7 +50,7 @@ class Trainer(DefaultTrainer):
 
 def augment(record):
     record = deepcopy(record)
-    image = plt.imread(record["file_name"])
+    image = plt.imread(record["filepath"])
     annotations = record["annotations"]
 
     boxes = [annotation["bbox"] for annotation in annotations]

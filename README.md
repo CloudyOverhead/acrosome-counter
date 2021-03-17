@@ -1,14 +1,34 @@
 # acrosome-counter
+
 Count spermatozoa using deep learning.
+
+![](https://github.com/CloudyOverhead/acrosome-counter/blob/main/example.jpg)
+
 
 ## Install instructions
 
 - Install [Anaconda](https://www.anaconda.com/products/individual)
-- Install [Git](https://git-scm.com/downloads)
-- Clone this repository locally, that is, on command line interface (search and `cmd` in Windows menu), type `git clone https://github.com/CloudyOverhead/acrosome-counter.git`
-- Go in the folder where it was cloned
-- Download [`protobuf`](https://github.com/protocolbuffers/protobuf/releases/)
-- Unpack and copy `bin/protoc.exe` in `acrosome-counter/models/research`
-- On command line interface, type `pip install .`
+- [Download this project](https://github.com/CloudyOverhead/acrosome-counter/releases)
+- Go in the folder where it was downloaded
+- On command line interface, type `conda env update -n base --file meta.yaml`
+- Download the [trained model]()
+- Put the trained model under a new subdirectory called `logs`
 
-If your computer has a [NVIDIA graphics card](https://nvidia.custhelp.com/app/answers/detail/a_id/2040/~/identifying-the-graphics-card-model-and-device-id-in-a-pc), you may [install the prerequisites for TensorFlow GPU 2.14.1](https://www.tensorflow.org/install/gpu?hl=fr).
+
+## Usage
+
+At inference time, navigate to the directory you want to run predictions on. Then, from command line interface, specify either:
+- `python -m acrosome_counter . --infer` to produce predictions. You may also add `--plot` to plot the results during execution.
+- `python -m acrosome_counter . --review` to review the predictions produced previously. You may also use `python -m acrosome_counter . --infer --review` to automatically fall into review mode after inference.
+
+`acrosome-counter` saves predictions as a XML file under the current directory (`.`) and statistics as a CSV file. The XML file is compatible with [CVAT](https://github.com/openvinotoolkit/cvat). The CSV file can be opened from any software that can parse tabular data, such as Excel.
+
+
+## Issues
+
+Ask for help directly in [GitHub's Issues tab](https://github.com/CloudyOverhead/acrosome-counter/issues).
+
+
+## Further inquiries
+
+If you have specific needs for deep learning solutions, contact me at `jerome@geolearn.ai` or `info@geolearn.ai`.

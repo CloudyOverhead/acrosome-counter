@@ -9,9 +9,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from detectron2.structures import BoxMode
 from detectron2.data import MetadataCatalog, DatasetCatalog
-
-from acrosome_counter.visualize import visualize
 from detectron2.structures.instances import Instances
+
+from .visualize import visualize
 
 MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
@@ -38,8 +38,8 @@ class Dataset:
             for root, _, files in walk(data_dir):
                 for file in files:
                     if 'tif' in file.split(".")[-1]:
-                        filepath = relpath(join(root, file), data_dir)
-                        self.filenames.append(filepath)
+                        filename = relpath(join(root, file), data_dir)
+                        self.filenames.append(filename)
 
         self.metadata = self.register()
 
@@ -57,7 +57,7 @@ class Dataset:
         height, width, _ = image.shape
 
         annotations = []
-        if self.labels:
+        try:
             boxes, classes, scores = self.labels[filename]
             for box, class_, score in zip(boxes, classes, scores):
                 annotation = {
@@ -67,9 +67,12 @@ class Dataset:
                     "score": score,
                 }
                 annotations.append(annotation)
+        except KeyError:
+            pass
 
         return {
-            "file_name": filename,
+            "filename": filename,
+            "filepath": filepath,
             "image_id": idx,
             "height": height,
             "width": width,
@@ -127,16 +130,17 @@ class Dataset:
 
     def register(self):
         name = "train" if self.is_training else "test"
+        if name in DatasetCatalog.keys():
+            DatasetCatalog.remove(name)
         DatasetCatalog.register(name, lambda: self)
         metadata = MetadataCatalog.get(name)
         metadata.set(thing_classes=MAP_NAMES)
         return metadata
 
-    def quality_control(self):
+    def review(self):
         for image_info in self:
-            image_name = image_info["file_name"]
-            image_path = join(self.images_dir, image_name)
-            image = plt.imread(image_path).copy()
+            filepath = image_info["filepath"]
+            image = plt.imread(filepath).copy()
             annotations = image_info["annotations"]
             boxes = [annotation["bbox"] for annotation in annotations]
             ids = [annotation["category_id"] for annotation in annotations]

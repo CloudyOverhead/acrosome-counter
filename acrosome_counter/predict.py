@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Run inference and save predictions to disk."""
 
-from os.path import join, split
+from os.path import join
 from xml.etree.ElementTree import ElementTree, Element, SubElement
 
 import matplotlib as mpl
@@ -10,8 +10,8 @@ from detectron2.engine import DefaultPredictor
 from detectron2.data import MetadataCatalog
 import pandas as pd
 
-from acrosome_counter.inputs import MAP_NAMES
-from acrosome_counter.visualize import visualize
+from .load_dataset import MAP_NAMES
+from .visualize import visualize
 
 mpl.use('TkAgg')
 
@@ -27,11 +27,12 @@ class Predictor(DefaultPredictor):
         self.dataset = dataset
         self.results = {}
         for image_info in dataset:
-            image_path = image_info["file_name"]
-            image = plt.imread(join(dataset.images_dir, image_path)).copy()
+            filename = image_info["filename"]
+            filepath = image_info["filepath"]
+            image = plt.imread(filepath).copy()
             input_image = image[..., [2, 1]]
             outputs = super().__call__(input_image)
-            self.results[image_path] = outputs['instances']
+            self.results[filename] = outputs['instances']
             if plot:
                 visualize(image, outputs["instances"].to("cpu"), self.metadata)
 
@@ -43,14 +44,14 @@ class Predictor(DefaultPredictor):
 
         SubElement(root, "version").text = "1.1"
 
-        for id, (image_path, outputs) in enumerate(self.results.items()):
+        for id, (filepath, outputs) in enumerate(self.results.items()):
             height, width = outputs.image_size
             image_element = SubElement(
                 root,
                 "image",
                 height=str(height),
                 width=str(width),
-                name=image_path,
+                name=filepath,
                 id=str(id),
             )
             boxes = outputs.pred_boxes
@@ -92,14 +93,13 @@ class Predictor(DefaultPredictor):
         quantities = pd.DataFrame(
             [], columns=["intact", "intermediaire", "perdu"],
         )
-        for image_path, outputs in self.results.items():
-            _, image_name = split(image_path)
-            quantities.loc[image_name] = [0, 0, 0]
+        for filename, outputs in self.results.items():
+            quantities.loc[filename] = [0, 0, 0]
             classes = outputs.pred_classes
             scores = outputs.scores
             for class_, score in zip(classes, scores):
                 class_ = class_.data.item()
                 score = score.data.item()
                 class_name = MAP_NAMES[class_]
-                quantities.loc[image_name, class_name] += 1
-        quantities.to_csv(dest_path)
+                quantities.loc[filename, class_name] += 1
+        quantities.to_csv(dest_path, sep=';')

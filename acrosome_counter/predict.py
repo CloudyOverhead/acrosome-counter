@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Run inference and save predictions to disk."""
 
-from os.path import join, split
+from os.path import join
 from xml.etree.ElementTree import ElementTree, Element, SubElement
 
 import matplotlib as mpl

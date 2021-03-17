@@ -4,10 +4,10 @@
 from os import makedirs
 from argparse import ArgumentParser
 
-from acrosome_counter.inputs import Dataset
+from acrosome_counter.load_dataset import Dataset
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
-from acrosome_counter.predictor import Predictor
+from acrosome_counter.predict import Predictor
 
 
 def main(args):

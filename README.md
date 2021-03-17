@@ -1,6 +1,4 @@
-# acrosome-counter
-
-Count spermatozoa using deep learning.
+# acrosome-counter: Count spermatozoa using deep learning
 
 ![](https://raw.githubusercontent.com/CloudyOverhead/acrosome-counter/main/example.png)
 
@@ -9,8 +7,8 @@ Count spermatozoa using deep learning.
 
 - Install [Anaconda](https://www.anaconda.com/products/individual)
 - [Download this project](https://github.com/CloudyOverhead/acrosome-counter/releases)
-- Go in the folder where it was downloaded
-- On command line interface, type `conda env update -n base --file meta.yaml`
+- Go in the directory where it was downloaded, unpack the project and go into the project's directory
+- On command line interface, navigate to the project's directory and type `conda env update -n base --file meta.yaml`
 - Download the [trained model](https://drive.google.com/file/d/1loadwjn-4cIuj-E_2SJrmGA3MV1xxrE0/view?usp=sharing)
 - Put the trained model under a new subdirectory called `logs`
 
@@ -31,4 +29,4 @@ Ask for help directly in [GitHub's Issues tab](https://github.com/CloudyOverhead
 
 ## Further inquiries
 
-If you have specific needs for deep learning solutions, contact me at <jerome@geolearn.ai> or <info@geolearn.ai>.
+If you have specific needs for deep learning solutions, contact me at <jerome@geolearn.ai> or <info@geolearn.ai>. Geolearn provides automated machine learning solutions for geosciences, but also general purpose artificial intelligence tools.

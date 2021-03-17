@@ -11,7 +11,6 @@ REQUIREMENTS = [
     "pytorch",
     "torchvision",
     "torchaudio",
-    "cudatoolkit==10.2",
     "opencv-python",
     "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
     "matplotlib",

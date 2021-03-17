@@ -127,6 +127,8 @@ class Dataset:
 
     def register(self):
         name = "train" if self.is_training else "test"
+        if name in DatasetCatalog.keys():
+            DatasetCatalog.remove(name)
         DatasetCatalog.register(name, lambda: self)
         metadata = MetadataCatalog.get(name)
         metadata.set(thing_classes=MAP_NAMES)

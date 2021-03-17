@@ -102,4 +102,4 @@ class Predictor(DefaultPredictor):
                 score = score.data.item()
                 class_name = MAP_NAMES[class_]
                 quantities.loc[image_name, class_name] += 1
-        quantities.to_csv(dest_path)
+        quantities.to_csv(dest_path, sep=';')

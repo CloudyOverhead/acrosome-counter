@@ -1,4 +1,5 @@
 # acrosome-counter
+
 Count spermatozoa using deep learning.
 
 ![](https://github.com/CloudyOverhead/acrosome-counter/blob/main/example.jpg)
@@ -28,6 +29,6 @@ At inference time, navigate to the directory you want to run predictions on. The
 Ask for help directly in [GitHub's Issues tab](https://github.com/CloudyOverhead/acrosome-counter/issues).
 
 
-## Inquiries
+## Further inquiries
 
 If you have specific needs for deep learning solutions, contact me at `jerome@geolearn.ai` or `info@geolearn.ai`.

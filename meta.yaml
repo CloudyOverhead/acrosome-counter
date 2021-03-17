@@ -1,6 +1,6 @@
 package:
   name: acrosome-counter
-  version: 1.0
+  version: "1.0"
 
 channels:
   - pytorch
@@ -12,8 +12,8 @@ dependencies:
   - pytorch
   - torchvision
   - torchaudio
-  - cudatoolkit==10.2
-  - opencv-python
+  - cudatoolkit=10.2
+  - opencv
   - matplotlib
   - imgaug
   - pandas

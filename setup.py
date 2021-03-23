@@ -1,22 +1,36 @@
 # -*- coding: utf-8 -*-
 
+import os
 from setuptools import setup, find_packages
 
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-REQUIREMENTS = [
-    "ninja",
-    "pytorch",
-    "torchvision",
-    "torchaudio",
+requirements = [
     "opencv-python",
-    "detectron2 @ git+https://github.com/facebookresearch/detectron2.git",
     "matplotlib",
     "imgaug",
     "pandas",
 ]
+if os.name != 'nt':
+    print("WARNING: Make sure to install `cudatoolkit=10.2` through `conda`.")
+    requirements += [
+        "ninja",
+        "pytorch==1.8.0",
+        "torchvision==0.9.0",
+        "git+https://github.com/facebookresearch/detectron2.git@v0.3",
+    ]
+else:
+    print(
+        "WARNING: Make sure to have a Nvidia GPU and to install "
+        "`cudatoolkit=10.1` through `conda`."
+    )
+    requirements += [
+        "pytorch==1.6.0",
+        "torchvision==0.7.0",
+        "git+https://github.com/DGMaxime/detectron2-windows.git",
+    ]
 
 setup(
     name="acrosome-counter",
@@ -28,7 +42,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/CloudyOverhead/acrosome-counter",
     packages=find_packages(),
-    install_requires=REQUIREMENTS,
+    install_requires=requirements,
     setup_requires=['setuptools-git'],
     classifiers=[
         "Programming Language :: Python :: 3",

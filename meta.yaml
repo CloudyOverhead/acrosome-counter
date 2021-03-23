@@ -17,6 +17,4 @@ dependencies:
   - matplotlib
   - imgaug
   - pandas
-  - pip
-  - pip:
-    - git+https://github.com/facebookresearch/detectron2.git
+  - detectron2=0.3

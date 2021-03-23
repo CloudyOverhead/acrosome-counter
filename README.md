@@ -5,10 +5,16 @@
 
 ## Install instructions
 
-- Install [Anaconda](https://www.anaconda.com/products/individual)
+- Install [Anaconda](https://www.anaconda.com/products/individual) (check *Add Anaconda3 to my PATH environment variable* upon installation)
 - [Download this project](https://github.com/CloudyOverhead/acrosome-counter/releases)
 - Go in the directory where it was downloaded, unpack the project and go into the project's directory
-- On command line interface, navigate to the project's directory and type `conda env update -n base --file meta.yaml`
+- On command line interface, navigate to the project's directory
+- On MacOS or Linux:
+  - Run `conda env update -n base --file meta.yaml`
+- On Windows:
+  - Make sure to have a Nvidia GPU
+  - Run `conda install cudatoolkit=10.1`
+  - Run `pip install .`
 - Download the [trained model](https://drive.google.com/file/d/1loadwjn-4cIuj-E_2SJrmGA3MV1xxrE0/view?usp=sharing)
 - Put the trained model under a new subdirectory called `logs`
 

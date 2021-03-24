@@ -17,17 +17,18 @@ if os.name != 'nt':
     print("WARNING: Make sure to install `cudatoolkit=10.2` through `conda`.")
     requirements += [
         "ninja",
-        "pytorch==1.8.0",
-        "torchvision==0.9.0",
+        "pytorch==1.8.0+cu102",
+        "torchvision==0.9.0+102",
         "git+https://github.com/facebookresearch/detectron2.git@v0.3",
     ]
 else:
     print(
-        "WARNING: Make sure to install `cudatoolkit=10.1` through `conda`."
+        "WARNING: Make sure you have installed CUDA 10.1 and Visual Studio "
+        "2019 manually, as well as `cudatoolkit=10.1` through `conda`."
     )
     requirements += [
-        "pytorch==1.6.0",
-        "torchvision==0.7.0",
+        "pytorch==1.6.0+cu101",
+        "torchvision==0.7.0+cu101",
         "git+https://github.com/DGMaxime/detectron2-windows.git",
     ]
 
@@ -42,6 +43,7 @@ setup(
     url="https://github.com/CloudyOverhead/acrosome-counter",
     packages=find_packages(),
     install_requires=requirements,
+    dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
     setup_requires=['setuptools-git'],
     classifiers=[
         "Programming Language :: Python :: 3",

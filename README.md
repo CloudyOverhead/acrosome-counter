@@ -12,7 +12,8 @@
 - On MacOS or Linux:
   - Run `conda env update`
 - On Windows:
-  - Make sure to have a Nvidia GPU
+  - Make sure to [have a Nvidia GPU](https://www.windowscentral.com/how-determine-graphics-card-windows-10)
+  - Install [Visual Studio 2019](https://visualstudio.microsoft.com/fr/downloads/)
   - Run `conda install cudatoolkit=10.1`
   - Run `pip install .`
 - Download the [trained model](https://drive.google.com/file/d/1loadwjn-4cIuj-E_2SJrmGA3MV1xxrE0/view?usp=sharing)

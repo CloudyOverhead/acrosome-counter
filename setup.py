@@ -19,9 +19,9 @@ requirements = [
     "pandas",
 ]
 if os.name != 'nt':
-    raise OSError, (
-        "Install this repository through `conda env update -n base "
-        "--file meta.yaml`."
+    raise OSError(
+        "Install this repository through `conda env update -n base --file "
+        "meta.yaml`."
     )
 else:
     print(

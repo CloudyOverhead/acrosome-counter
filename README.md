@@ -10,7 +10,7 @@
 - Go in the directory where it was downloaded, unpack the project and go into the project's directory
 - On command line interface, navigate to the project's directory
 - On MacOS or Linux:
-  - Run `conda env update`
+  - Run `conda env update -n base --file meta.yaml`
 - On Windows:
   - Make sure to [have a Nvidia GPU](https://www.windowscentral.com/how-determine-graphics-card-windows-10)
   - Install [Visual Studio 2019](https://visualstudio.microsoft.com/fr/downloads/)

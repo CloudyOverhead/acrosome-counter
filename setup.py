@@ -23,8 +23,7 @@ if os.name != 'nt':
     ]
 else:
     print(
-        "WARNING: Make sure to have a Nvidia GPU and to install "
-        "`cudatoolkit=10.1` through `conda`."
+        "WARNING: Make sure to install `cudatoolkit=10.1` through `conda`."
     )
     requirements += [
         "pytorch==1.6.0",

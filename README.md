@@ -10,7 +10,7 @@
 - Go in the directory where it was downloaded, unpack the project and go into the project's directory
 - On command line interface, navigate to the project's directory
 - On MacOS or Linux:
-  - Run `conda env update -n base --file meta.yaml`
+  - Run `conda env update`
 - On Windows:
   - Make sure to have a Nvidia GPU
   - Run `conda install cudatoolkit=10.1`

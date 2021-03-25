@@ -13,6 +13,7 @@
   - Run `conda env update -n base --file meta.yaml`
 - On Windows:
   - Make sure to [have a Nvidia GPU](https://www.windowscentral.com/how-determine-graphics-card-windows-10)
+  - Install [Git](https://git-scm.com/downloads)
   - Install [CUDA 10.1](https://developer.nvidia.com/cuda-10.1-download-archive-base)
   - Install [Visual Studio 2019](https://visualstudio.microsoft.com/fr/downloads/)
   - Run `conda install cudatoolkit=10.1`

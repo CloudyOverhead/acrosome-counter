@@ -2,7 +2,7 @@
 
 import os
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup
 
 if os.name != 'nt':
     raise OSError(
@@ -48,7 +48,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/CloudyOverhead/acrosome-counter",
-    packages=find_packages(),
+    packages=['acrosome_counter'],
     install_requires=requirements,
     setup_requires=['setuptools-git'],
     classifiers=[

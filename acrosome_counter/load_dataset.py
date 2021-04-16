@@ -17,6 +17,11 @@ MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
 QTY_CLASSES = len(MAP_NAMES)
 
+if isinstance(DatasetCatalog, type):
+    DatasetCatalog = DatasetCatalog()
+if isinstance(MetadataCatalog, type):
+    MetadataCatalog = MetadataCatalog()
+
 
 class Dataset:
     def __init__(self, data_dir, is_training):

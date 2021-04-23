@@ -38,7 +38,7 @@ class Dataset:
             if exists(join(data_dir, "predictions.xml")):
                 self.labels = self.load_labels("predictions.xml")
             else:
-                self.labels = None
+                self.labels = {}
             self.filenames = []
             for root, _, files in walk(data_dir):
                 for file in files:

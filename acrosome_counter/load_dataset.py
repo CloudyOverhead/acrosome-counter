@@ -43,8 +43,10 @@ class Dataset:
             for root, _, files in walk(data_dir):
                 for file in files:
                     if 'tif' in file.split(".")[-1]:
-                        filename = relpath(join(root, file), data_dir)
-                        self.filenames.append(filename)
+                        filepath = join(root, file)
+                        if is_merged(filepath):
+                            filename = relpath(filepath, data_dir)
+                            self.filenames.append(filename)
 
         self.metadata = self.register()
 
@@ -164,3 +166,8 @@ class Dataset:
                 scores=scores,
             )
             visualize(image, instances, self.metadata)
+
+
+def is_merged(filepath):
+    image = plt.imread(filepath)
+    return image[..., 1].any() and image[..., 2].any()

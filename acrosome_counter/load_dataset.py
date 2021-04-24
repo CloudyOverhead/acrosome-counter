@@ -17,6 +17,11 @@ MAP_NAMES = ['intact', 'intermediaire', 'perdu']
 MAP_IDS = {name: i for i, name in enumerate(MAP_NAMES)}
 QTY_CLASSES = len(MAP_NAMES)
 
+if isinstance(DatasetCatalog, type):
+    DatasetCatalog = DatasetCatalog()
+if isinstance(MetadataCatalog, type):
+    MetadataCatalog = MetadataCatalog()
+
 
 class Dataset:
     def __init__(self, data_dir, is_training):
@@ -33,7 +38,7 @@ class Dataset:
             if exists(join(data_dir, "predictions.xml")):
                 self.labels = self.load_labels("predictions.xml")
             else:
-                self.labels = None
+                self.labels = {}
             self.filenames = []
             for root, _, files in walk(data_dir):
                 for file in files:
@@ -130,7 +135,7 @@ class Dataset:
 
     def register(self):
         name = "train" if self.is_training else "test"
-        if name in DatasetCatalog.keys():
+        if name in DatasetCatalog.list():
             DatasetCatalog.remove(name)
         DatasetCatalog.register(name, lambda: self)
         metadata = MetadataCatalog.get(name)

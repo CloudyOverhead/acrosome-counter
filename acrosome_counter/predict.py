@@ -7,10 +7,9 @@ from xml.etree.ElementTree import ElementTree, Element, SubElement
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from detectron2.engine import DefaultPredictor
-from detectron2.data import MetadataCatalog
 import pandas as pd
 
-from .load_dataset import MAP_NAMES
+from .load_dataset import MAP_NAMES, MetadataCatalog
 from .visualize import visualize
 
 mpl.use('TkAgg')

@@ -15,10 +15,10 @@
   - Make sure to [have a Nvidia GPU](https://www.windowscentral.com/how-determine-graphics-card-windows-10)
   - Install [Git](https://git-scm.com/downloads)
   - Install [CUDA 10.1](https://developer.nvidia.com/cuda-10.1-download-archive-base)
-  - Install [Visual Studio 2019](https://visualstudio.microsoft.com/fr/downloads/)
+  - Install [Visual Studio 2019](https://visualstudio.microsoft.com/fr/downloads/) (install all C++ build tools)
   - Restart your computer
   - Run `conda install cudatoolkit=10.1`
-  - Run `pip install -e .`
+  - Run `pip install -e .` (within the project's directory)
 - Download the [trained model](https://drive.google.com/file/d/1loadwjn-4cIuj-E_2SJrmGA3MV1xxrE0/view?usp=sharing)
 - Put the trained model under a new subdirectory called `logs`
 

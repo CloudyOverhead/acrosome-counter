@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Build the network."""
 
-from os.path import join
+from os.path import join, dirname, pardir
 
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
 
 from .load_dataset import QTY_CLASSES
 
-LOG_DIR = join(".", "logs")
+LOG_DIR = join(dirname(__file__), pardir, "logs")
 PRETRAINED_CHECKPOINT = model_zoo.get_checkpoint_url(
     "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
 )

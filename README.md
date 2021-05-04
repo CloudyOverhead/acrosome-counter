@@ -29,6 +29,10 @@ At inference time, navigate to the directory you want to run predictions on. The
 - `python -m acrosome_counter . --infer` to produce predictions. You may also add `--plot` to plot the results during execution.
 - `python -m acrosome_counter . --review` to review the predictions produced previously. You may also use `python -m acrosome_counter . --infer --review` to automatically fall into review mode after inference.
 
+You may also use `-t` or `--threshold` to filter results according to confidence. For instance, `python -m acrosome_counter . --infer --review -t 0.2` would discard all predictions with confidence under `0.2`. Threshold ranges from `0` to `1` and is `0.1` by default.
+
+You may also use `-z` or `--zoom` if your input images have a zoom different from 20 ×. For instance, `python -m acrosome_counter . --infer --review --zoom 40` would resize images at 40 × magnification to the appropriate 20 ×.
+
 `acrosome-counter` saves predictions as a XML file under the current directory (`.`) and statistics as a CSV file. The XML file is compatible with [CVAT](https://github.com/openvinotoolkit/cvat). The CSV file can be opened from any software that can parse tabular data, such as Microsoft Excel.
 
 

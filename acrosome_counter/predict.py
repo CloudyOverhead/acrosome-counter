@@ -14,6 +14,8 @@ from .visualize import visualize
 
 mpl.use('TkAgg')
 
+DEFAULT_ZOOM = 20
+
 
 class Predictor(DefaultPredictor):
     def __init__(self, cfg):
@@ -102,3 +104,8 @@ class Predictor(DefaultPredictor):
                 class_name = MAP_NAMES[class_]
                 quantities.loc[filename, class_name] += 1
         quantities.to_csv(dest_path, sep=';')
+
+
+def adjust_zoom(cfg, target_zoom):
+    cfg.INPUT.MIN_SIZE_TEST *= DEFAULT_ZOOM / target_zoom
+    cfg.INPUT.MAX_SIZE_TEST *= DEFAULT_ZOOM / target_zoom

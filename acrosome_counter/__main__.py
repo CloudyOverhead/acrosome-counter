@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from acrosome_counter.load_dataset import Dataset
 from acrosome_counter.build_model import build_cfg
 from acrosome_counter.train import Trainer
-from acrosome_counter.predict import Predictor
+from acrosome_counter.predict import Predictor, adjust_zoom
 
 
 def main(args):
@@ -29,6 +29,7 @@ def main(args):
             is_training, args.batch_size, args.learning_rate, args.qty_iters,
         )
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.threshold
+        adjust_zoom(cfg, args.zoom)
         predictor = Predictor(cfg)
         predictor(dataset, plot=args.plot)
         predictor.export_xml()
@@ -46,6 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-it', '--qty_iters', default=1, type=int)
     parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
     parser.add_argument('-t', '--threshold', default=.1, type=float)
+    parser.add_argument('-z', '--zoom', default=20, type=float)
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--infer', action='store_true')
     parser.add_argument('--plot', action='store_true')

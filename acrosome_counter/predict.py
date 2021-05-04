@@ -107,5 +107,5 @@ class Predictor(DefaultPredictor):
 
 
 def adjust_zoom(cfg, target_zoom):
-    cfg.INPUT.MIN_SIZE_TEST *= target_zoom / DEFAULT_ZOOM
-    cfg.INPUT.MAX_SIZE_TEST *= target_zoom / DEFAULT_ZOOM
+    cfg.INPUT.MIN_SIZE_TEST *= DEFAULT_ZOOM / target_zoom
+    cfg.INPUT.MAX_SIZE_TEST *= DEFAULT_ZOOM / target_zoom

@@ -150,7 +150,9 @@ class Dataset:
             image = plt.imread(filepath).copy()
             annotations = image_info["annotations"]
             boxes = [annotation["bbox"] for annotation in annotations]
+            boxes = np.array(boxes)
             ids = [annotation["category_id"] for annotation in annotations]
+            ids = np.array(ids)
             _, quantities = np.unique(ids, return_counts=True)
             text_info = ", ".join(
                 f"{class_}: {quantity}"

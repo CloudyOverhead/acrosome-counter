@@ -35,7 +35,7 @@ class Predictor(DefaultPredictor):
             input_image = image[..., [2, 1]]
             outputs = super().__call__(input_image)
             instances = outputs['instances'].to("cpu")
-            instances = filter_iou(instances, iou_threshold=.3)
+            instances = filter_iou(instances, threshold=.3)
             self.results[filename] = instances
             if plot:
                 visualize(image, instances, self.metadata)

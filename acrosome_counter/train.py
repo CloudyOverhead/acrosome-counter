@@ -16,8 +16,8 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 AUGMENTER = aug.Sequential(
     [
-        aug.Add(Normal(0, 10), per_channel=True),
-        aug.Multiply(TruncatedNormal(1, .1, low=.5, high=1.5)),
+        aug.Add(Normal(0, 20), per_channel=True),
+        aug.Multiply(TruncatedNormal(1, .15, low=.5, high=1.5)),
         aug.GaussianBlur((0, 2)),
         aug.Fliplr(.5),
         aug.Flipud(.5),

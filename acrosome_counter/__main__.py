@@ -31,7 +31,7 @@ def main(args):
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.threshold
         adjust_zoom(cfg, args.zoom)
         predictor = Predictor(cfg)
-        predictor(dataset, plot=args.plot)
+        predictor(dataset, iou_threshold=args.iou_threshold, plot=args.plot)
         predictor.export_xml()
         predictor.export_csv()
 
@@ -47,6 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-it', '--qty_iters', default=1, type=int)
     parser.add_argument('-lr', '--learning_rate', default=2.5E-4, type=float)
     parser.add_argument('-t', '--threshold', default=.1, type=float)
+    parser.add_argument('-iou', '--iou_threshold', default=.3, type=float)
     parser.add_argument('-z', '--zoom', default=20, type=float)
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--infer', action='store_true')

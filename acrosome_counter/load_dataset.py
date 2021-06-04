@@ -171,5 +171,5 @@ class Dataset:
 
 
 def is_merged(filepath):
-    image = plt.imread(filepath)
-    return (image[..., 1] > 100).any() and (image[..., 2] > 100).any()
+    _, file = split(filepath)
+    return 'merge' in file
